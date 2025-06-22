@@ -8,6 +8,15 @@ which is the foundation of all CNN operations.
 import numpy as np
 import matplotlib.pyplot as plt
 
+import sys
+import os
+current_dir = os.path.dirname(os.path.abspath(__file__))
+parent_dir = os.path.dirname(current_dir)
+sys.path.insert(0, parent_dir)
+
+from utils.test_data import create_simple_test_image
+from utils.visualization import plot_convolution_demo
+
 def manual_convolution_2d(image, kernel, stride=1, padding=0):
     """
     Implement 2D convolution from scratch.
@@ -56,13 +65,6 @@ def manual_convolution_2d(image, kernel, stride=1, padding=0):
     
     return output
 
-def create_test_image():
-    """Create a simple test image with clear patterns."""
-    # Create a 7x7 image with a vertical line
-    image = np.zeros((7, 7))
-    image[:, 3] = 1  # Vertical line in middle
-    return image
-
 def create_edge_kernels():
     """Create basic edge detection kernels."""
     # Vertical edge detector (detects horizontal changes)
@@ -80,7 +82,7 @@ def create_edge_kernels():
 def test_convolution_2d():
     """Test 2D convolution with edge detection."""
     # Create test image
-    image = create_test_image()
+    image = create_simple_test_image()
     vertical_kernel, horizontal_kernel = create_edge_kernels()
     
     print("Original image:")
@@ -98,30 +100,20 @@ def test_convolution_2d():
     
     return image, vertical_result, horizontal_result
 
-def visualize_convolution():
-    """Visualize the convolution process."""
-    image, vertical_result, horizontal_result = test_convolution_2d()
-    
-    plt.figure(figsize=(12, 4))
-    
-    plt.subplot(1, 3, 1)
-    plt.imshow(image, cmap='gray')
-    plt.title('Original Image\n(Vertical Line)')
-    plt.colorbar()
-    
-    plt.subplot(1, 3, 2)
-    plt.imshow(vertical_result, cmap='gray')
-    plt.title('Vertical Edge Detector\n(Should detect the line)')
-    plt.colorbar()
-    
-    plt.subplot(1, 3, 3)
-    plt.imshow(horizontal_result, cmap='gray')
-    plt.title('Horizontal Edge Detector\n(Should show nothing)')
-    plt.colorbar()
-    
-    plt.tight_layout()
-    plt.show()
-
 if __name__ == "__main__":
-    test_convolution_2d()
-    visualize_convolution()
+    # Use centralized test data
+    test_image = create_simple_test_image()
+    
+    # Your existing kernel definitions stay the same
+    sobel_x = np.array([[-1, 0, 1], [-2, 0, 2], [-1, 0, 1]], dtype=np.float32)
+    sobel_y = np.array([[-1, -2, -1], [0, 0, 0], [1, 2, 1]], dtype=np.float32)
+    
+    # Apply convolutions
+    result_v = manual_convolution_2d(test_image, sobel_x)
+    result_h = manual_convolution_2d(test_image, sobel_y)
+    
+    # Use centralized visualization
+    plot_convolution_demo(test_image, sobel_x, result_v, result_h, 
+                         title="Edge Detection Demo")
+    
+    print("Convolution test completed!")

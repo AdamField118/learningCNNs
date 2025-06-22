@@ -6,15 +6,23 @@ to build complete understanding of how convolution parameters affect results.
 """
 
 import numpy as np
-import matplotlib.pyplot as plt
 import sys
 import os
 
-# Add parent directory for imports
+# Path setup
 current_dir = os.path.dirname(os.path.abspath(__file__))
 parent_dir = os.path.dirname(current_dir)
 sys.path.insert(0, parent_dir)
 
+# Centralized imports
+from utils.test_data import create_test_pattern
+from utils.visualization import plot_convolution_mechanics
+from utils.mathematical_analysis import (
+    calculate_conv_output_size, 
+    analyze_computational_cost,
+    print_dimension_analysis,
+    print_cost_analysis
+)
 from day02.edge_detection_basics import manual_convolution_2d
 from kernels.edge_detection_kernels import sobel_x_kernel
 
@@ -162,11 +170,11 @@ def apply_dilation(kernel, dilation):
 
 def demonstrate_stride_effects():
     """Show how stride affects output size and feature sampling."""
-    # Create test image
-    test_image = create_test_pattern(20, 20)
-    kernel = sobel_x_kernel()
-    
     print("=== Stride Effects Demonstration ===")
+    
+    # Use centralized test pattern
+    test_image = create_test_pattern(20, 20, 'mixed')
+    kernel = sobel_x_kernel()
     
     results = {}
     for stride in [1, 2, 3]:
@@ -174,17 +182,18 @@ def demonstrate_stride_effects():
         results[f'stride_{stride}'] = result
         print(f"Stride {stride}: Input {test_image.shape} -> Output {result.shape}")
     
-    # Visualize results
-    visualize_stride_effects(test_image, results)
+    # Use centralized visualization
+    plot_convolution_mechanics(test_image, results, "Stride Effects")
     
     return results
 
 def demonstrate_padding_strategies():
     """Compare different padding approaches and their effects."""
-    test_image = create_test_pattern(10, 10)
-    kernel = np.array([[0, -1, 0], [-1, 4, -1], [0, -1, 0]])  # Laplacian
-    
     print("=== Padding Strategies Demonstration ===")
+    
+    # Use centralized test pattern
+    test_image = create_test_pattern(10, 10, 'corner')
+    kernel = np.array([[0, -1, 0], [-1, 4, -1], [0, -1, 0]])  # Laplacian
     
     results = {}
     
@@ -194,24 +203,18 @@ def demonstrate_padding_strategies():
         results[f'pad_{padding}'] = result
         print(f"Padding {padding}: Input {test_image.shape} -> Output {result.shape}")
     
-    # Implement different padding TYPES (constant, reflect, etc.)
-    print("\n=== Different Padding Types ===")
-    padding_types = ['constant', 'reflect', 'edge', 'wrap']
+    # Use centralized visualization instead of the old function
+    plot_convolution_mechanics(test_image, results, "Padding Effects")
     
-    for padding_type in padding_types:
-        result = manual_convolution_2d_with_padding_types(test_image, kernel, padding=1, padding_mode=padding_type)
-        results[f'type_{padding_type}'] = result
-        print(f"Padding type '{padding_type}': Output {result.shape}")
-    
-    visualize_padding_effects(test_image, results)
     return results
 
 def demonstrate_dilation():
     """Show how dilation increases receptive field."""
-    test_image = create_test_pattern(15, 15)
-    kernel = np.array([[1, 1, 1], [1, -8, 1], [1, 1, 1]])  # Simple edge detector
-    
     print("=== Dilation Effects Demonstration ===")
+    
+    # Use centralized test pattern
+    test_image = create_test_pattern(15, 15, 'diagonal')
+    kernel = np.array([[1, 1, 1], [1, -8, 1], [1, 1, 1]])  # Simple edge detector
     
     results = {}
     for dilation in [1, 2, 3]:
@@ -222,18 +225,15 @@ def demonstrate_dilation():
         print(f"Dilation {dilation}: Kernel {kernel.shape} -> Effective {dilated_kernel.shape}")
         print(f"Receptive field: {dilated_kernel.shape}")
     
-    visualize_dilation_effects(test_image, results)
+    # Use centralized visualization
+    plot_convolution_mechanics(test_image, results, "Dilation Effects")
+    
     return results
 
-def calculate_output_dimensions_formula():
-    """Practice and demonstrate output dimension calculations."""
-    print("=== Output Dimension Calculations ===")
+def test_output_calculations():
+    """Test output dimension calculations using centralized functions."""
+    print("=== Output Dimension Analysis ===")
     
-    def calc_output_size(input_size, kernel_size, stride, padding):
-        """Calculate output size using the standard formula."""
-        return (input_size + 2 * padding - kernel_size) // stride + 1
-    
-    # Test cases
     test_cases = [
         (28, 3, 1, 0),  # MNIST-like: 28x28 image, 3x3 kernel, stride 1, no padding
         (28, 3, 1, 1),  # Same but with padding to preserve size
@@ -241,231 +241,31 @@ def calculate_output_dimensions_formula():
         (100, 7, 3, 3), # Galaxy-sized image
     ]
     
-    print("Input Size | Kernel | Stride | Padding | Output Size")
-    print("-" * 55)
-    
-    for input_size, kernel_size, stride, padding in test_cases:
-        output_size = calc_output_size(input_size, kernel_size, stride, padding)
-        print(f"{input_size:9d} | {kernel_size:6d} | {stride:6d} | {padding:7d} | {output_size:11d}")
-    
-    # Add receptive field calculations
-    # Show how multiple layers compound the receptive field
-    print("\n=== Receptive Field Calculations ===")
-    
-    def calculate_receptive_field(layers):
-        """Calculate receptive field through multiple layers.
-        
-        Args:
-            layers: List of (kernel_size, stride) tuples
-            
-        Returns:
-            List of receptive field sizes after each layer
-        """
-        receptive_field = 1
-        jump = 1
-        receptive_fields = [receptive_field]
-        
-        for kernel_size, stride in layers:
-            receptive_field = receptive_field + (kernel_size - 1) * jump
-            jump = jump * stride
-            receptive_fields.append(receptive_field)
-        
-        return receptive_fields
-    
-    # Example multi-layer networks
-    networks = [
-        ("3 layers, 3x3 kernels", [(3, 1), (3, 1), (3, 1)]),
-        ("With stride=2 in middle", [(3, 1), (3, 2), (3, 1)]),
-        ("Larger kernels", [(5, 1), (5, 1), (3, 1)]),
-        ("Mixed configuration", [(3, 1), (5, 2), (3, 1), (3, 1)])
-    ]
-    
-    print("\nReceptive Field Growth Through Layers:")
-    print("Network | Layer 0 | Layer 1 | Layer 2 | Layer 3 | Layer 4")
-    print("-" * 65)
-    
-    for name, config in networks:
-        rf_progression = calculate_receptive_field(config)
-        rf_str = " | ".join([f"{rf:7d}" if i < len(rf_progression) else "       " 
-                            for i, rf in enumerate(rf_progression[:5])])
-        if len(rf_progression) > 5:
-            rf_str += " | ..."
-        print(f"{name:20s} | {rf_str}")
-    
-    return calc_output_size
+    # Use centralized analysis
+    print_dimension_analysis(test_cases, "Convolution Output Dimensions")
 
-def analyze_computational_cost():
-    """Analyze how different parameters affect computational cost."""
+def test_computational_cost():
+    """Test computational cost analysis using centralized functions."""
     print("=== Computational Cost Analysis ===")
     
-    def calculate_operations(input_h, input_w, kernel_h, kernel_w, stride, padding):
-        """Calculate number of multiply-add operations."""
-        output_h = (input_h + 2 * padding - kernel_h) // stride + 1
-        output_w = (input_w + 2 * padding - kernel_w) // stride + 1
-        
-        # Each output pixel requires kernel_h * kernel_w operations
-        total_ops = output_h * output_w * kernel_h * kernel_w
-        return total_ops, (output_h, output_w)
-    
-    # Compare different configurations
-    base_config = (224, 224, 3, 3, 1, 1)  # ImageNet-like
-    
     configs = [
-        ("Base (3x3, stride=1)", (224, 224, 3, 3, 1, 1)),
-        ("Larger kernel (5x5)", (224, 224, 5, 5, 1, 2)),
-        ("Stride=2", (224, 224, 3, 3, 2, 1)),
-        ("No padding", (224, 224, 3, 3, 1, 0)),
+        ("Base (3x3, stride=1)", ((224, 224), 3, 1, 1)),
+        ("Larger kernel (5x5)", ((224, 224), 5, 1, 2)),  
+        ("Stride=2", ((224, 224), 3, 2, 1)),
+        ("No padding", ((224, 224), 3, 1, 0)),
     ]
     
-    print("Configuration | Operations | Output Shape | Relative Cost")
-    print("-" * 60)
-    
-    base_ops = None
-    for name, config in configs:
-        ops, output_shape = calculate_operations(*config)
-        if base_ops is None:
-            base_ops = ops
-            relative = 1.0
-        else:
-            relative = ops / base_ops
-            
-        print(f"{name:20s} | {ops:10,d} | {output_shape!s:12s} | {relative:7.2f}x")
-
-def create_test_pattern(height, width):
-    """Create a test pattern for demonstrating convolution effects."""
-    pattern = np.zeros((height, width))
-    
-    # Add some geometric shapes
-    center_h, center_w = height // 2, width // 2
-    
-    # Vertical line
-    pattern[:, center_w] = 1
-    
-    # Horizontal line  
-    pattern[center_h, :] = 1
-    
-    # Diagonal corners
-    for i in range(min(height//4, width//4)):
-        if i < height and i < width:
-            pattern[i, i] = 0.5
-            pattern[height-1-i, width-1-i] = 0.5
-    
-    return pattern
-
-def visualize_stride_effects(original, results):
-    """Create visualization showing original + stride results"""
-    fig, axes = plt.subplots(1, len(results) + 1, figsize=(15, 4))
-    
-    # Show original image
-    axes[0].imshow(original, cmap='gray', interpolation='nearest')
-    axes[0].set_title(f'Original Image\n{original.shape}')
-    axes[0].axis('off')
-    
-    # Show results for each stride
-    for idx, (key, result) in enumerate(results.items()):
-        stride_value = key.split('_')[1]
-        
-        axes[idx + 1].imshow(result, cmap='RdBu', interpolation='nearest')
-        axes[idx + 1].set_title(f'Stride {stride_value}\nOutput: {result.shape}')
-        axes[idx + 1].axis('off')
-        
-        plt.colorbar(axes[idx + 1].get_images()[0], ax=axes[idx + 1], fraction=0.046)
-    
-    plt.tight_layout()
-    plt.show()
-
-def visualize_padding_effects(original, results):
-    """Create visualization showing padding effects"""
-    # Separate padding amount results from padding type results
-    amount_results = {k: v for k, v in results.items() if k.startswith('pad_')}
-    type_results = {k: v for k, v in results.items() if k.startswith('type_')}
-    
-    if amount_results:
-        # Visualize padding amounts
-        fig, axes = plt.subplots(2, len(amount_results), figsize=(12, 8))
-        
-        for idx, (key, result) in enumerate(amount_results.items()):
-            padding_value = int(key.split('_')[1])
-            
-            # Top row: show the padded input
-            padded_input = np.pad(original, padding_value, mode='constant', constant_values=0)
-            axes[0, idx].imshow(padded_input, cmap='gray', interpolation='nearest')
-            axes[0, idx].set_title(f'Input + Padding {padding_value}\n{padded_input.shape}')
-            axes[0, idx].axis('off')
-            
-            # Bottom row: show the convolution result
-            axes[1, idx].imshow(result, cmap='RdBu', interpolation='nearest')
-            axes[1, idx].set_title(f'Output: {result.shape}')
-            axes[1, idx].axis('off')
-            
-            plt.colorbar(axes[1, idx].get_images()[0], ax=axes[1, idx], fraction=0.046)
-        
-        plt.tight_layout()
-        plt.suptitle('Padding Amount Effects', y=1.02)
-        plt.show()
-    
-    if type_results:
-        # Visualize padding types
-        fig, axes = plt.subplots(2, len(type_results), figsize=(16, 8))
-        
-        for idx, (key, result) in enumerate(type_results.items()):
-            padding_type = key.split('_')[1]
-            
-            # Top row: show the padded input for each type
-            if padding_type == 'constant':
-                padded_input = np.pad(original, 1, mode='constant', constant_values=0)
-            elif padding_type == 'reflect':
-                padded_input = np.pad(original, 1, mode='reflect')
-            elif padding_type == 'edge':
-                padded_input = np.pad(original, 1, mode='edge')
-            elif padding_type == 'wrap':
-                padded_input = np.pad(original, 1, mode='wrap')
-            
-            axes[0, idx].imshow(padded_input, cmap='gray', interpolation='nearest')
-            axes[0, idx].set_title(f'Input + {padding_type} padding\n{padded_input.shape}')
-            axes[0, idx].axis('off')
-            
-            # Bottom row: show the convolution result
-            axes[1, idx].imshow(result, cmap='RdBu', interpolation='nearest')
-            axes[1, idx].set_title(f'Output: {result.shape}')
-            axes[1, idx].axis('off')
-            
-            plt.colorbar(axes[1, idx].get_images()[0], ax=axes[1, idx], fraction=0.046)
-        
-        plt.tight_layout()
-        plt.suptitle('Padding Type Effects', y=1.02)
-        plt.show()
-
-def visualize_dilation_effects(original, results):
-    """Create visualization showing dilation effects"""
-    kernel = np.array([[1, 1, 1], [1, -8, 1], [1, 1, 1]])  # Same kernel used in demonstration
-    
-    fig, axes = plt.subplots(2, len(results), figsize=(12, 8))
-    
-    for idx, (key, result) in enumerate(results.items()):
-        dilation_value = int(key.split('_')[1])
-        
-        # Top row: show what the dilated kernel looks like
-        dilated_kernel = apply_dilation(kernel, dilation_value)
-        
-        axes[0, idx].imshow(dilated_kernel, cmap='RdBu', interpolation='nearest')
-        axes[0, idx].set_title(f'Dilation {dilation_value} Kernel\n{dilated_kernel.shape}')
-        axes[0, idx].axis('off')
-        
-        # Bottom row: show the convolution result
-        axes[1, idx].imshow(result, cmap='RdBu', interpolation='nearest')
-        axes[1, idx].set_title(f'Output: {result.shape}')
-        axes[1, idx].axis('off')
-        
-        plt.colorbar(axes[1, idx].get_images()[0], ax=axes[1, idx], fraction=0.046)
-    
-    plt.tight_layout()
-    plt.show()
+    # Use centralized analysis
+    print_cost_analysis(configs, "Computational Cost Comparison")
 
 if __name__ == "__main__":
-    # Run all demonstrations
+    print("=== Convolution Mechanics Testing ===")
+    
+    # Test all effects with updated functions
     demonstrate_stride_effects()
     demonstrate_padding_strategies() 
     demonstrate_dilation()
-    calculate_output_dimensions_formula()
-    analyze_computational_cost()
+    test_output_calculations()
+    test_computational_cost()
+    
+    print("All convolution mechanics tests completed!")

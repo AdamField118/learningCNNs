@@ -14,12 +14,16 @@ from astropy import units as u
 
 import sys
 import os
+
 current_dir = os.path.dirname(os.path.abspath(__file__))
 parent_dir = os.path.dirname(current_dir)
 sys.path.insert(0, parent_dir)
 
+from utils.test_data import create_synthetic_galaxy
+from utils.visualization import plot_feature_responses
 from kernels.edge_detection_kernels import sobel_x_kernel, sobel_y_kernel
 from day02.edge_detection_basics import manual_convolution_2d
+
 
 def create_scale_sensitive_kernels(scale):
     """
@@ -179,119 +183,29 @@ def create_brightness_gradient_kernels(type):
 def test_kernel_comparison():
     """Compare different kernel types on the same galaxy image."""
     
-    # Create synthetic galaxy (copy from Day 2 or import)
     galaxy = create_synthetic_galaxy()
     
-    # Test 1: Scale Comparison
     fine_response = manual_convolution_2d(galaxy, create_scale_sensitive_kernels('fine'))
     medium_response = manual_convolution_2d(galaxy, create_scale_sensitive_kernels('medium'))
     large_response = manual_convolution_2d(galaxy, create_scale_sensitive_kernels('large'))
     
-    # Test 2: Your Custom vs Standard
     sobel_x_response = manual_convolution_2d(galaxy, sobel_x_kernel())
     fine_custom_response = manual_convolution_2d(galaxy, create_scale_sensitive_kernels('fine'))
     
-    # Test 3: Orientation Sensitivity
     horizontal_response = manual_convolution_2d(galaxy, create_orientation_sensitive_kernels('fine', 'horizontal'))
     diagonal_response = manual_convolution_2d(galaxy, create_orientation_sensitive_kernels('fine', 'diagonal_1'))
     
-    # Test 4: Gradient Detection
     gentle_x_response = manual_convolution_2d(galaxy, create_brightness_gradient_kernels('gentle_x'))
     radial_response = manual_convolution_2d(galaxy, create_brightness_gradient_kernels('radial'))
     
-    # Visualization
-    visualize_kernel_comparison(galaxy, {
-        'Original': galaxy,
+    plot_feature_responses(galaxy, {
         'Sobel X (Standard)': sobel_x_response,
         'Fine Scale (Custom)': fine_custom_response,
         'Medium Scale': medium_response,
         'Diagonal Orientation': diagonal_response,
         'Gentle Gradient': gentle_x_response,
         'Radial Gradient': radial_response
-    })
-
-def visualize_kernel_comparison(original, responses):
-    """Create comprehensive visualization of kernel responses."""
-    n_plots = len(responses)
-    cols = 3
-    rows = (n_plots + cols - 1) // cols
-    
-    # Much larger figure with explicit spacing
-    fig, axes = plt.subplots(rows, cols, figsize=(18, 8 * rows))
-    
-    # Handle case where we only have one row
-    if rows == 1:
-        axes = axes.reshape(1, -1)
-    
-    # Flatten axes for easy indexing
-    axes = axes.flatten()
-    
-    for i, (name, response) in enumerate(responses.items()):
-        ax = axes[i]
-        im = ax.imshow(response, cmap='gray')
-        
-        # Add colorbar with proper spacing
-        plt.colorbar(im, ax=ax, shrink=0.8)
-        
-        # Simple, short titles
-        if name != 'Original':
-            max_response = np.max(np.abs(response))
-            # Very short titles
-            short_names = {
-                'Sobel X (Standard)': 'Sobel X',
-                'Fine Scale (Custom)': 'Fine Scale', 
-                'Medium Scale': 'Medium',
-                'Diagonal Orientation': 'Diagonal',
-                'Gentle Gradient': 'Gentle',
-                'Radial Gradient': 'Radial'
-            }
-            display_name = short_names.get(name, name)
-            ax.set_title(f'{display_name}\n{max_response:.1f}', fontsize=12)
-        else:
-            ax.set_title(name, fontsize=14)
-    
-    # Hide unused subplots
-    for j in range(len(responses), len(axes)):
-        axes[j].set_visible(False)
-    
-    # Critical: Much more spacing
-    plt.subplots_adjust(
-        left=0.05,      # Left margin
-        bottom=0.05,    # Bottom margin  
-        right=0.95,     # Right margin
-        top=0.85,       # Top margin (leave room for titles!)
-        wspace=0.3,     # Width spacing between plots
-        hspace=0.5      # Height spacing between plots
-    )
-    
-    plt.show()
-
-def create_synthetic_galaxy():
-    """Create synthetic galaxy (copy from Day 2 or create new version)."""
-    # You can copy this from your Day 2 notebook
-    # Or create a simpler version for testing
-    size = 50
-    center = size // 2
-    galaxy = np.zeros((size, size))
-    
-    # Create circular galaxy base
-    y, x = np.ogrid[:size, :size]
-    mask = (x - center)**2 + (y - center)**2 <= (size//3)**2
-    galaxy[mask] = 0.5
-    
-    # Add spiral arms (simplified)
-    for i in range(size):
-        for j in range(size):
-            dx, dy = j - center, i - center
-            angle = np.arctan2(dy, dx)
-            radius = np.sqrt(dx**2 + dy**2)
-            
-            if radius < size//3 and radius > 5:
-                spiral_condition = np.sin(angle * 3 + radius * 0.2) > 0.3
-                if spiral_condition:
-                    galaxy[i, j] = 1.0
-    
-    return galaxy
+    }, title="Astronomical Kernel Comparison")
 
 if __name__ == "__main__":
     test_kernel_comparison()

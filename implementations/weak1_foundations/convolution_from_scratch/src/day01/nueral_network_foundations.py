@@ -8,6 +8,14 @@ perform computations, with focus on the mathematical operations.
 import numpy as np
 import matplotlib.pyplot as plt
 
+import sys
+import os
+current_dir = os.path.dirname(os.path.abspath(__file__))
+parent_dir = os.path.dirname(current_dir)
+sys.path.insert(0, parent_dir)
+
+from utils.visualization import plot_activation_comparison
+
 def linear_transformation(input_vector, weight_matrix, bias_vector):
     """
     The fundamental operation of neural networks: linear transformation.
@@ -81,42 +89,20 @@ def compare_activation_functions():
     print("\n=== Comparing Activation Functions ===")
     
     # Create range of input values
-    x = np.linspace(-5, 5, 100)
+    x_values = np.linspace(-5, 5, 100)
     
     # Calculate activation functions
-    sigmoid_output = activation_function_sigmoid(x)
-    relu_output = activation_function_relu(x)
+    sigmoid_values = activation_function_sigmoid(x_values)
+    relu_values = activation_function_relu(x_values)
     
     # Plot comparison
-    plt.figure(figsize=(12, 4))
-    
-    plt.subplot(1, 3, 1)
-    plt.plot(x, sigmoid_output, 'b-', linewidth=2)
-    plt.title('Sigmoid Activation')
-    plt.xlabel('Input')
-    plt.ylabel('Output')
-    plt.grid(True, alpha=0.3)
-    
-    plt.subplot(1, 3, 2)
-    plt.plot(x, relu_output, 'r-', linewidth=2)
-    plt.title('ReLU Activation')
-    plt.xlabel('Input')
-    plt.ylabel('Output')
-    plt.grid(True, alpha=0.3)
-    
-    plt.subplot(1, 3, 3)
-    plt.plot(x, sigmoid_output, 'b-', linewidth=2, label='Sigmoid')
-    plt.plot(x, relu_output, 'r-', linewidth=2, label='ReLU')
-    plt.title('Comparison')
-    plt.xlabel('Input')
-    plt.ylabel('Output')
-    plt.legend()
-    plt.grid(True, alpha=0.3)
-    
-    plt.tight_layout()
-    plt.show()
+    plot_activation_comparison(
+        x_values, 
+        {'Sigmoid': sigmoid_values, 'ReLU': relu_values},
+        title="Activation Function Analysis"
+    )
 
-    return x, sigmoid_output, relu_output
+    return x_values, sigmoid_values, relu_values
 
 def test_basic_operations():
     """Test our fundamental operations with concrete examples."""
