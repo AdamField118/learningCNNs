@@ -54,26 +54,26 @@ class SpatialAttention:
         height, width, channels = feature_map.shape
         
         # Compute spatial attention weights
-        # Step 1: Aggregate across channels (max and mean pooling)
+        # Aggregate across channels (max and mean pooling)
         max_pooled = np.max(feature_map, axis=-1, keepdims=True)    # Max across channel dimension
         mean_pooled = np.mean(feature_map, axis=-1, keepdims=True)  # Mean across channel dimension
         
-        # Step 2: Concatenate max and mean
+        #  Concatenate max and mean
         pooled_features = np.concatenate([max_pooled, mean_pooled], axis=-1)  # Stack max and mean [H, W, 2]
         
-        # Step 3: Apply convolution to get attention map
+        # Apply convolution to get attention map
         # This learns which spatial locations are important
         from day02.edge_detection_basics import manual_convolution_2d
         
         # Apply 3x3 conv with the learned weights
-        # For simplicity, we'll use a learned 3x3 filter
+        # For simplicity, use a learned 3x3 filter
         attention_kernel = np.sum(self.spatial_conv_weights, axis=-1)  # Sum over output channels
         attention_kernel = np.sum(attention_kernel, axis=-1)           # Sum over input channels
         
         # Apply convolution to the pooled features (using first channel as primary)
         attention_scores = manual_convolution_2d(pooled_features[:, :, 0], attention_kernel)
         
-        # Step 4: Apply sigmoid to get attention weights (0 to 1)
+        # Apply sigmoid to get attention weights (0 to 1)
         # Flatten for processing, then reshape back
         scores_flat = attention_scores.flatten()
         attention_weights_flat = activation_function_sigmoid(scores_flat)
@@ -96,7 +96,7 @@ class SpatialAttention:
                 start_w = (att_w - width) // 2
                 attention_weights = attention_weights[start_h:start_h+height, start_w:start_w+width]
         
-        # Step 5: Apply attention to original features
+        # Apply attention to original features
         # Expand attention weights to match all channels
         attention_weights_expanded = np.expand_dims(attention_weights, axis=-1)  # [H, W, 1]
         attended_features = feature_map * attention_weights_expanded  # Element-wise multiply
@@ -148,15 +148,15 @@ class ChannelAttention:
         channel_stats = np.mean(feature_map, axis=(0, 1))  # Mean over height and width dimensions
         
         # Excitation: Learn channel importance
-        # Step 1: Reduce dimensionality with ReLU
+        # Reduce dimensionality with ReLU
         fc1_output = np.dot(channel_stats, self.fc1_weights) + self.fc1_bias
         reduced = np.maximum(0, fc1_output)  # ReLU activation
         
-        # Step 2: Expand back and apply sigmoid
+        # Expand back and apply sigmoid
         fc2_output = np.dot(reduced, self.fc2_weights) + self.fc2_bias
         channel_weights = activation_function_sigmoid(fc2_output)  # Apply sigmoid
         
-        # Step 3: Apply channel attention
+        # Apply channel attention
         # Reshape channel weights to broadcast properly
         channel_weights_reshaped = channel_weights.reshape(1, 1, -1)  # [1, 1, channels]
         attended_features = feature_map * channel_weights_reshaped  # Multiply each channel by its weight

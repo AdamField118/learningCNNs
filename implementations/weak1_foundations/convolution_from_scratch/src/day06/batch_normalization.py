@@ -102,7 +102,7 @@ def demonstrate_internal_covariate_shift():
     # Layer 1 activations at start of training
     layer1_early = np.random.normal(0, 1, 1000)
     
-    # Layer 1 activations after some training (distribution has shifted!)
+    # Layer 1 activations after some training (distribution has shifted)
     layer1_later = np.random.normal(2, 3, 1000)  # Mean and std changed
     
     # Show how this affects subsequent layers

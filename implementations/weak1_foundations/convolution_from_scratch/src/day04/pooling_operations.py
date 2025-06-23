@@ -95,7 +95,7 @@ def test_pooling_on_galaxy_features():
     # Use centralized galaxy generator
     galaxy = create_synthetic_galaxy(size=50, spiral_arms=True)
     
-    # Apply edge detection (your Day 2/3 work)
+    # Apply edge detection (Day 2/3 work)
     from kernels.edge_detection_kernels import sobel_x_kernel
     sobel_x = sobel_x_kernel()
     
@@ -234,7 +234,7 @@ if __name__ == "__main__":
     print("Original feature map:")
     print(test_feature_map)
     
-    # Test your implementations
+    # Test implementations
     max_result = max_pooling_2d(test_feature_map, pool_size=2)
     avg_result = average_pooling_2d(test_feature_map, pool_size=2)
     

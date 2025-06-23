@@ -86,7 +86,7 @@ class ResidualBlock:
         conv1_output = manual_convolution_2d(x, self.conv1_weights)
         conv1_activated = activation_function_relu(conv1_output)
 
-        # Apply second convolution (NO activation yet!)
+        # Apply second convolution (NO activation yet)
         conv2_output = manual_convolution_2d(conv1_activated, self.conv2_weights)
 
         # Handle dimension mismatch for skip connection
@@ -108,7 +108,7 @@ class ResidualBlock:
                 w_end = w_start + conv2_output.shape[1]
                 identity = identity[h_start:h_end, w_start:w_end]
 
-        # Add skip connection (THE KEY INSIGHT!)
+        # Add skip connection
         output = conv2_output + identity
 
         # Apply activation AFTER adding skip connection
@@ -269,19 +269,19 @@ def residual_connections_for_galaxies():
     """
     Explore how residual connections help with galaxy feature detection.
 
-    This connects residual connections to your astronomical applications.
+    This connects residual connections to astronomical applications.
     """
     print("=== Residual Connections for Galaxy Analysis ===")
 
     galaxy = create_synthetic_galaxy(size=48, spiral_arms=True)
 
     # Show how deep networks can extract complex galaxy features
-    # Layer 1: Basic edges (your Day 2 work)
+    # Layer 1: Basic edges (Day 2 work)
     edge_kernel = np.array([[-1, 0, 1], [-2, 0, 2], [-1, 0, 1]], dtype=np.float32)
     layer1_features = manual_convolution_2d(galaxy, edge_kernel)
     layer1_features = activation_function_relu(layer1_features)
 
-    # Layer 2: Texture patterns (your Day 3 work)  
+    # Layer 2: Texture patterns (Day 3 work)  
     texture_kernel = np.array([[1, -2, 1], [-2, 4, -2], [1, -2, 1]], dtype=np.float32)
 
     # Without residual connections:
@@ -386,7 +386,7 @@ if __name__ == "__main__":
     # Show the solution
     test_residual_vs_plain_network()
 
-    # Connect to your research
+    # Connect to ShearNet research
     residual_connections_for_galaxies()
 
     # Historical context

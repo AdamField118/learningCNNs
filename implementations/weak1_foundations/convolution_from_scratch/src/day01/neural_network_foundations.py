@@ -198,7 +198,7 @@ def demonstrate_parameter_explosion():
     print(f"28x28 image → 100 hidden neurons:")
     print(f"Parameters needed: {fully_connected_params:,}")
     
-    # Larger image like your galaxy images might be
+    # Larger image like galaxy images might be
     galaxy_image_pixels = 200 * 200
     fully_connected_galaxy = galaxy_image_pixels * hidden_layer_size
     print(f"\n200x200 galaxy image → 100 hidden neurons:")

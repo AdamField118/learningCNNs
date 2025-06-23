@@ -104,7 +104,7 @@ if __name__ == "__main__":
     # Use centralized test data
     test_image = create_simple_test_image()
     
-    # Your existing kernel definitions stay the same
+    # existing kernel definitions stay the same
     sobel_x = np.array([[-1, 0, 1], [-2, 0, 2], [-1, 0, 1]], dtype=np.float32)
     sobel_y = np.array([[-1, -2, -1], [0, 0, 0], [1, 2, 1]], dtype=np.float32)
     
