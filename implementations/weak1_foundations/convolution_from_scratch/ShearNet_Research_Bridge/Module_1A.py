@@ -432,14 +432,3 @@ if __name__ == "__main__":
     
     print("\n3. Testing complete Galaxy CNN...")
     test_galaxy_cnn()
-    
-    print("\nImplementation Tasks:")
-    print("✓ Complete all TODOs in order")
-    print("✓ Test each component before moving to the next")
-    print("✓ Compare results to Day 2-6 NumPy implementations")
-    print("✓ Verify the Galaxy CNN produces reasonable g1, g2 predictions")
-    
-    print("\nAfter completing this module:")
-    print("→ Module 1B: Your custom astronomical kernels in Flax")
-    print("→ Module 2: Load and analyze actual ShearNet architecture")
-    print("→ Module 3: Performance benchmarking and improvements")
