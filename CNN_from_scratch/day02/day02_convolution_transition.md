@@ -49,7 +49,7 @@ Lets talk about the transition from 1D to 2D convolution and how the math scales
 My understanding before was nothing!  
 
 **What I Learned:**
-I learned what convolution and what a kernel was! This took place [here](../implementations/weak1_foundations/convolution_from_scratch/src/day02/convolution_math_derivation.py#L11) and [here](../implementations/weak1_foundations/convolution_from_scratch/src/day02/edge_detection_basics.py#L11)
+I learned what convolution and what a kernel was! This took place [here](./convolution_math_derivation.py#L11) and [here](./edge_detection_basics.py#L11)
 
 **Mathematical Insights:**
 
@@ -69,11 +69,11 @@ Not really, not right now.
 
 ### What I Built Today
 
-I worked on the files in [day02](../implementations/weak1_foundations/convolution_from_scratch/src/day02) along with [kernels](../implementations/weak1_foundations/convolution_from_scratch/src/kernels)
+I worked on the files in [day02](../kernels)
 
 ### Experimental Results
 
-From [convolution_math_derivation.py](../implementations/weak1_foundations/convolution_from_scratch/src/day02/convolution_math_derivation.py):
+From [convolution_math_derivation.py](./convolution_math_derivation.py):
 ```
 Signal: [1 2 3 4 5]
 Kernel: [0.5 1.  0.5]
@@ -82,7 +82,7 @@ NumPy result: [0.5 2.  4.  6.  8.  7.  2.5]
 Match: True
 ```
 
-From [edge_detection_basics.py](../implementations/weak1_foundations/convolution_from_scratch/src/day02/edge_detection_basics.py):
+From [edge_detection_basics.py](./edge_detection_basics.py):
 ```
 Original image:
 [[0. 0. 0. 1. 0. 0. 0.]
@@ -135,7 +135,7 @@ Horizontal edge detection result:
   <p>Figure 1. Edge detection visualized.</p>
 </div>
 
-From [galaxy_edge_detection.ipynb](../implementations/weak1_foundations/convolution_from_scratch/src/day02/galaxy_edge_detection.ipynb):
+From [galaxy_edge_detection.ipynb](./galaxy_edge_detection.ipynb):
 <div align="center">
   <img src="../assets/synth_galaxy_edge_detection.png" alt="synthetic galaxy edge detection visualized" height="225" width="auto">
   <p>Figure 2. Synthetic galaxy edge detection visualized.</p>
@@ -221,9 +221,9 @@ Go to sleep earlier!
 
 ## Quick Reference Section
 
-[21D Convolution](../implementations/weak1_foundations/convolution_from_scratch/src/day02/convolution_math_derivation#L11)
+[21D Convolution](.day02/convolution_math_derivation#L11)
 
-[2D Convolution](../implementations/weak1_foundations/convolution_from_scratch/src/day02/edge_detection_basics.py#L11)
+[2D Convolution](./edge_detection_basics.py#L11)
 
 ---
 

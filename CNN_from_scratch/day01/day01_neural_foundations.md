@@ -43,7 +43,7 @@ Okay let's talk about backpropagation as the chain rule.
 Previously I had heard this connection drawn in 3Blue1Brown's videos linked below. It didn't really click then.  
 
 **What I Learned:**
-The nested gradient calculations [here](../implementations/weak1_foundations/convolution_from_scratch/src/day01/nueral_network_foundations.py#L308) are the fruition of the what I learned!
+The nested gradient calculations [here](./nueral_network_foundations.py#L308) are the fruition of the what I learned!
 
 **Mathematical Insights:**
 
@@ -64,7 +64,7 @@ From backprop nothing much.
 
 ### What I Built Today
 
-I build [neural_network_foundations.py](../implementations/weak1_foundations/convolution_from_scratch/src/day01/nueral_network_foundations.py)
+I built [neural_network_foundations.py](./nueral_network_foundations.py)
 
 ### Experimental Results
 
@@ -162,9 +162,9 @@ np.maximum(0, x)
   <p>Figure 1. Sigmoid vs ReLU plots</p>
 </div>
 
-[Forward pass](../implementations/weak1_foundations/convolution_from_scratch/src/day01/nueral_network_foundations.py#L252)
+[Forward pass](./nueral_network_foundations.py#L252)
 
-[Backwards pass](../implementations/weak1_foundations/convolution_from_scratch/src/day01/nueral_network_foundations.py#L282)
+[Backwards pass](./nueral_network_foundations.py#L282)
 
 ---
 

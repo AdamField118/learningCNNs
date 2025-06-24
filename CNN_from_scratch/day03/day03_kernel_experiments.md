@@ -223,7 +223,7 @@ Dilation could actually be the key to ShearNet's problems, I am excited to look 
 
 ### Today's "Aha!" Moments
 
-Today's aha moment was when I coded the [`apply_dilation()`](../implementations/weak1_foundations/convolution_from_scratch/src/day03/convolution_mechanics.py#L120)
+Today's aha moment was when I coded the [`apply_dilation()`](./convolution_mechanics.py#L120)
 
 ### Connections to ShearNet Problem
 
@@ -285,7 +285,7 @@ Probably wake up to my alarm lol, slept an extra 2 hours cause I didn't hear my 
 
 ## Quick Reference Section
 
-Pretty much the entire [`convolution_mechanics.py`](../implementations/weak1_foundations/convolution_from_scratch/src/day03/convolution_mechanics.py) file, but mainly [`apply_dilation()`](../implementations/weak1_foundations/convolution_from_scratch/src/day03/convolution_mechanics.py#L120)
+Pretty much the entire [`convolution_mechanics.py`](./convolution_mechanics.py) file, but mainly [`apply_dilation()`](./convolution_mechanics.py#L120)
 
 ---
 
