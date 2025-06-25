@@ -15,6 +15,7 @@ current_dir = os.path.dirname(os.path.abspath(__file__))
 parent_dir = os.path.dirname(current_dir)
 sys.path.insert(0, parent_dir)
 
+from utils.output_system import log_print, log_experiment_start, log_experiment_end, save_plot
 from utils.test_data import create_synthetic_galaxy
 from day01.neural_network_foundations import activation_function_relu
 
@@ -90,11 +91,11 @@ class BatchNormLayer:
             
         return output
 
-def demonstrate_internal_covariate_shift():
+def demonstrate_internal_covariate_shift() -> None:
     """
     Show the problem batch normalization solves.
     """
-    print("=== Internal Covariate Shift Problem ===")
+    log_print("=== Internal Covariate Shift Problem ===")
     
     # Simulate how activations change during training
     # Create synthetic "before" and "after" activation distributions
@@ -106,15 +107,15 @@ def demonstrate_internal_covariate_shift():
     layer1_later = np.random.normal(2, 3, 1000)  # Mean and std changed
     
     # Show how this affects subsequent layers
-    print(f"Early training - Layer 1: mean={layer1_early.mean():.2f}, std={layer1_later.std():.2f}")
-    print(f"Later training - Layer 1: mean={layer1_later.mean():.2f}, std={layer1_later.std():.2f}")
+    log_print(f"Early training - Layer 1: mean={layer1_early.mean():.2f}, std={layer1_later.std():.2f}")
+    log_print(f"Later training - Layer 1: mean={layer1_later.mean():.2f}, std={layer1_later.std():.2f}")
     
     # Show impact on next layer (using ReLU activation)
     layer2_early = activation_function_relu(layer1_early)
     layer2_later = activation_function_relu(layer1_later)
     
-    print(f"Early training - Layer 2 (post-ReLU): mean={layer2_early.mean():.2f}, std={layer2_early.std():.2f}")
-    print(f"Later training - Layer 2 (post-ReLU): mean={layer2_later.mean():.2f}, std={layer2_later.std():.2f}")
+    log_print(f"Early training - Layer 2 (post-ReLU): mean={layer2_early.mean():.2f}, std={layer2_early.std():.2f}")
+    log_print(f"Later training - Layer 2 (post-ReLU): mean={layer2_later.mean():.2f}, std={layer2_later.std():.2f}")
     
     # Visualize the distribution shift
     plt.figure(figsize=(15, 8))
@@ -170,17 +171,17 @@ def demonstrate_internal_covariate_shift():
     plt.legend()
     
     plt.tight_layout()
-    plt.show()
+    save_plot('demonstrate internal covariate shift.png')
     
-    print("\nKey Problem: As training progresses, input distributions to each layer change,")
-    print("making it harder for subsequent layers to learn effectively.")
-    print("BatchNorm Solution: Keep input distributions normalized and stable.")
+    log_print("\nKey Problem: As training progresses, input distributions to each layer change,")
+    log_print("making it harder for subsequent layers to learn effectively.")
+    log_print("BatchNorm Solution: Keep input distributions normalized and stable.")
 
-def compare_training_stability():
+def compare_training_stability() -> None:
     """
     Compare training with and without batch normalization.
     """
-    print("=== Training Stability Comparison ===")
+    log_print("=== Training Stability Comparison ===")
     
     # Simulate training curves
     epochs = 50
@@ -260,25 +261,25 @@ def compare_training_stability():
     plt.grid(True, alpha=0.3)
     
     plt.tight_layout()
-    plt.show()
+    save_plot('compare training stability.png')
     
-    print("Without Batch Norm:")
-    print("  - Unstable training with high variance")
-    print("  - Requires careful learning rate tuning")
-    print("  - Prone to gradient explosion/vanishing")
-    print("  - Final loss: {:.3f}".format(loss_no_bn[-1]))
+    log_print("Without Batch Norm:")
+    log_print("  - Unstable training with high variance")
+    log_print("  - Requires careful learning rate tuning")
+    log_print("  - Prone to gradient explosion/vanishing")
+    log_print("  - Final loss: {:.3f}".format(loss_no_bn[-1]))
     
-    print("\nWith Batch Norm:")
-    print("  - Stable, smooth convergence")
-    print("  - Allows higher learning rates")
-    print("  - Robust to hyperparameter choices")
-    print("  - Final loss: {:.3f}".format(loss_bn[-1]))
+    log_print("\nWith Batch Norm:")
+    log_print("  - Stable, smooth convergence")
+    log_print("  - Allows higher learning rates")
+    log_print("  - Robust to hyperparameter choices")
+    log_print("  - Final loss: {:.3f}".format(loss_bn[-1]))
 
-def batch_norm_for_galaxy_networks():
+def batch_norm_for_galaxy_networks() -> None:
     """
     Apply batch normalization concepts to galaxy analysis.
     """
-    print("=== Batch Normalization for Galaxy Networks ===")
+    log_print("=== Batch Normalization for Galaxy Networks ===")
     
     # Create multiple galaxy images with different characteristics
     galaxies = []
@@ -306,10 +307,10 @@ def batch_norm_for_galaxy_networks():
     
     batch = np.stack(galaxies, axis=0)  # Create batch [8, 32, 32]
     
-    print(f"Created batch of {len(galaxies)} galaxies")
-    print(f"Galaxy brightness ranges:")
+    log_print(f"Created batch of {len(galaxies)} galaxies")
+    log_print(f"Galaxy brightness ranges:")
     for i, (galaxy, gtype) in enumerate(zip(galaxies, galaxy_types)):
-        print(f"  {gtype}: min={galaxy.min():.3f}, max={galaxy.max():.3f}, mean={galaxy.mean():.3f}")
+        log_print(f"  {gtype}: min={galaxy.min():.3f}, max={galaxy.max():.3f}, mean={galaxy.mean():.3f}")
     
     # Show activation statistics without batch norm
     # Apply edge detection (convolution) to the batch
@@ -325,12 +326,12 @@ def batch_norm_for_galaxy_networks():
     # Analyze activation statistics
     all_activations = np.concatenate([act.flatten() for act in activations])
     
-    print(f"\nBefore Batch Norm (after edge detection):")
-    print(f"  Mean: {all_activations.mean():.3f}")
-    print(f"  Std: {all_activations.std():.3f}")
-    print(f"  Min: {all_activations.min():.3f}")
-    print(f"  Max: {all_activations.max():.3f}")
-    print(f"  Range: {all_activations.max() - all_activations.min():.3f}")
+    log_print(f"\nBefore Batch Norm (after edge detection):")
+    log_print(f"  Mean: {all_activations.mean():.3f}")
+    log_print(f"  Std: {all_activations.std():.3f}")
+    log_print(f"  Min: {all_activations.min():.3f}")
+    log_print(f"  Max: {all_activations.max():.3f}")
+    log_print(f"  Range: {all_activations.max() - all_activations.min():.3f}")
     
     # Apply batch normalization
     # First, let's simulate this would be applied in a CNN layer
@@ -353,12 +354,12 @@ def batch_norm_for_galaxy_networks():
     
     all_normalized_activations = np.concatenate([act.flatten() for act in normalized_activations])
     
-    print(f"\nAfter Batch Norm (after edge detection):")
-    print(f"  Mean: {all_normalized_activations.mean():.3f}")
-    print(f"  Std: {all_normalized_activations.std():.3f}")
-    print(f"  Min: {all_normalized_activations.min():.3f}")
-    print(f"  Max: {all_normalized_activations.max():.3f}")
-    print(f"  Range: {all_normalized_activations.max() - all_normalized_activations.min():.3f}")
+    log_print(f"\nAfter Batch Norm (after edge detection):")
+    log_print(f"  Mean: {all_normalized_activations.mean():.3f}")
+    log_print(f"  Std: {all_normalized_activations.std():.3f}")
+    log_print(f"  Min: {all_normalized_activations.min():.3f}")
+    log_print(f"  Max: {all_normalized_activations.max():.3f}")
+    log_print(f"  Range: {all_normalized_activations.max() - all_normalized_activations.min():.3f}")
     
     # Visualize the effect
     plt.figure(figsize=(15, 10))
@@ -391,28 +392,30 @@ def batch_norm_for_galaxy_networks():
     plt.legend()
     
     plt.tight_layout()
-    plt.show()
+    save_plot('batch norm for galaxy networks.png')
     
-    print("\nBenefits for galaxy networks:")
-    print("- Stable training regardless of galaxy brightness variations")
-    print("- Consistent feature extraction across different galaxy types")
-    print("- Faster convergence for weak lensing shear measurement")
-    print("- Less sensitive to initialization and hyperparameters")
-    print("- Enables processing of mixed galaxy populations effectively")
+    log_print("\nBenefits for galaxy networks:")
+    log_print("- Stable training regardless of galaxy brightness variations")
+    log_print("- Consistent feature extraction across different galaxy types")
+    log_print("- Faster convergence for weak lensing shear measurement")
+    log_print("- Less sensitive to initialization and hyperparameters")
+    log_print("- Enables processing of mixed galaxy populations effectively")
     
     # Demonstrate inference mode
-    print(f"\nDemonstrating inference mode:")
-    print(f"Running mean: {bn_layer.running_mean[:5]}")  # Show first 5 values
-    print(f"Running var: {bn_layer.running_var[:5]}")    # Show first 5 values
+    log_print(f"\nDemonstrating inference mode:")
+    log_print(f"Running mean: {bn_layer.running_mean[:5]}")  # Show first 5 values
+    log_print(f"Running var: {bn_layer.running_var[:5]}")    # Show first 5 values
     
     # Test with new galaxy in inference mode
     test_galaxy = create_synthetic_galaxy(size=32, spiral_arms=True, add_noise=True)
     test_galaxy_reshaped = test_galaxy.reshape(1, -1)
     test_normalized = bn_layer.forward(test_galaxy_reshaped, training=False)
     
-    print(f"Test galaxy normalized using running statistics: mean={test_normalized.mean():.3f}, std={test_normalized.std():.3f}")
+    log_print(f"Test galaxy normalized using running statistics: mean={test_normalized.mean():.3f}, std={test_normalized.std():.3f}")
 
 if __name__ == "__main__":
+    log_experiment_start(6, 'Batch Normalization')
+
     # Show the problem
     demonstrate_internal_covariate_shift()
     
@@ -421,3 +424,5 @@ if __name__ == "__main__":
     
     # Connect to galaxies
     batch_norm_for_galaxy_networks()
+
+    log_experiment_end(6)

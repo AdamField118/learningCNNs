@@ -8,7 +8,19 @@ deep understanding of the mathematical operations underlying CNNs.
 import numpy as np
 import matplotlib.pyplot as plt
 
-def convolution_1d_simple(signal, kernel):
+import sys
+import os
+
+# Path setup
+current_dir = os.path.dirname(os.path.abspath(__file__))
+parent_dir = os.path.dirname(current_dir)
+sys.path.insert(0, parent_dir)
+
+# Import our enhanced utilities
+from utils.output_system import log_print, log_experiment_start, log_experiment_end, log_array_stats
+from utils.visualization import plot_activation_comparison
+
+def convolution_1d_simple(signal, kernel) -> np.array:
     """
     Implement 1D convolution from mathematical definition.
     
@@ -37,21 +49,25 @@ def convolution_1d_simple(signal, kernel):
     
     return output
 
-def test_simple_convolution():
+def test_simple_convolution() -> None:
     """Test the 1D convolution with a simple example."""
     # Simple test case
     signal = np.array([1, 2, 3, 4, 5])
     kernel = np.array([0.5, 1, 0.5])  # Simple smoothing kernel
     
     result = convolution_1d_simple(signal, kernel)
-    print(f"Signal: {signal}")
-    print(f"Kernel: {kernel}")
-    print(f"Result: {result}")
+    log_array_stats("Signal", signal)
+    log_array_stats("Kernel", kernel)
+    log_array_stats("Results", result)
     
     # Compare with NumPy's implementation to verify correctness
     numpy_result = np.convolve(signal, kernel, mode='full')
-    print(f"NumPy result: {numpy_result}")
-    print(f"Match: {np.allclose(result, numpy_result)}")
+    log_array_stats("NumPy results", numpy_result)
+    log_print(f"Match: {np.allclose(result, numpy_result)}")
 
 if __name__ == "__main__":
+    log_experiment_start(2, "Test Simple Convolution")
+
     test_simple_convolution()
+
+    log_experiment_end(2)

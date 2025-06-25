@@ -6,12 +6,35 @@ Centralized plotting functions with consistent styling - no more overlaps!
 
 import matplotlib.pyplot as plt
 import numpy as np
+from typing import Dict, Any, Optional, Union, List, Tuple
+import os
+import sys
 
-def plot_activation_comparison(x_values, activations_dict, title="Activation Function Comparison"):
+# Import our output system
+current_dir = os.path.dirname(os.path.abspath(__file__))
+parent_dir = os.path.dirname(current_dir)
+if parent_dir not in sys.path:
+    sys.path.insert(0, parent_dir)
+
+from utils.output_system import save_plot, log_print
+
+def plot_activation_comparison(
+    x_values: np.ndarray, 
+    activations_dict: Dict[str, np.ndarray], 
+    title: str = "Activation Function Comparison",
+    filename_prefix: str = "activation_comparison"
+) -> str:
     """
-    Plot activation function comparison.
+    Plot activation function comparison and save to file.
     
-    Moved from neural_network_foundations.py (was compare_activation_functions)
+    Args:
+        x_values: Input values for activation functions
+        activations_dict: Dictionary mapping activation names to their outputs
+        title: Plot title
+        filename_prefix: Prefix for saved filename
+        
+    Returns:
+        Path to saved plot file
     """
     n_funcs = len(activations_dict)
     fig, axes = plt.subplots(1, n_funcs + 1, figsize=(4 * (n_funcs + 1), 4))
@@ -35,13 +58,31 @@ def plot_activation_comparison(x_values, activations_dict, title="Activation Fun
     
     plt.suptitle(title, fontsize=14)
     plt.tight_layout()
-    plt.show()
+    
+    filename = f"{filename_prefix}.png"
+    return save_plot(filename)
 
-def plot_convolution_demo(image, kernel, result_v, result_h, title="Convolution Demo"):
+def plot_convolution_demo(
+    image: np.ndarray, 
+    kernel: np.ndarray, 
+    result_v: np.ndarray, 
+    result_h: np.ndarray, 
+    title: str = "Convolution Demo",
+    filename_prefix: str = "convolution_demo"
+) -> str:
     """
     Standard convolution demonstration plot.
     
-    Moved from edge_detection_basics.py (was visualize_convolution)
+    Args:
+        image: Original input image
+        kernel: Convolution kernel used
+        result_v: Vertical detection result
+        result_h: Horizontal detection result
+        title: Plot title
+        filename_prefix: Prefix for saved filename
+        
+    Returns:
+        Path to saved plot file
     """
     plt.figure(figsize=(12, 4))
     
@@ -68,14 +109,27 @@ def plot_convolution_demo(image, kernel, result_v, result_h, title="Convolution 
     
     plt.suptitle(title, fontsize=14)
     plt.tight_layout()
-    plt.show()
-
-def plot_feature_responses(original, responses_dict, title="Feature Response Analysis"):
-    """
-    Plot original + multiple feature responses with PERFECT spacing.
     
-    Moved from kernel_experiment.py (was visualize_kernel_comparison)
-    FIXES the title overlap issues!
+    filename = f"{filename_prefix}.png"
+    return save_plot(filename)
+
+def plot_feature_responses(
+    original: np.ndarray, 
+    responses_dict: Dict[str, np.ndarray], 
+    title: str = "Feature Response Analysis",
+    filename_prefix: str = "feature_responses"
+) -> str:
+    """
+    Plot original + multiple feature responses with perfect spacing.
+    
+    Args:
+        original: Original input image
+        responses_dict: Dictionary mapping response names to feature maps
+        title: Plot title
+        filename_prefix: Prefix for saved filename
+        
+    Returns:
+        Path to saved plot file
     """
     n_plots = len(responses_dict) + 1
     cols = 3
@@ -122,19 +176,33 @@ def plot_feature_responses(original, responses_dict, title="Feature Response Ana
     for j in range(len(responses_dict) + 1, len(axes)):
         axes[j].set_visible(False)
     
-    # PERFECT spacing - no more overlaps!
+    # Perfect spacing - no more overlaps!
     plt.subplots_adjust(
         left=0.05, bottom=0.05, right=0.95, top=0.85,
         wspace=0.3, hspace=0.5
     )
     plt.suptitle(title, fontsize=16)
-    plt.show()
+    
+    filename = f"{filename_prefix}.png"
+    return save_plot(filename)
 
-def plot_convolution_mechanics(original, results_dict, effect_type="Convolution Effects"):
+def plot_convolution_mechanics(
+    original: np.ndarray, 
+    results_dict: Dict[str, np.ndarray], 
+    effect_type: str = "Convolution Effects",
+    filename_prefix: str = "convolution_mechanics"
+) -> str:
     """
     Generic plotter for stride/padding/dilation effects.
     
-    Consolidates visualize_stride_effects, visualize_padding_effects, visualize_dilation_effects
+    Args:
+        original: Original input image
+        results_dict: Dictionary mapping parameter names to results
+        effect_type: Type of effect being demonstrated
+        filename_prefix: Prefix for saved filename
+        
+    Returns:
+        Path to saved plot file
     """
     n_results = len(results_dict)
     fig, axes = plt.subplots(2, n_results, figsize=(4 * n_results, 8))
@@ -156,4 +224,84 @@ def plot_convolution_mechanics(original, results_dict, effect_type="Convolution 
         plt.colorbar(im, ax=axes[1, idx], fraction=0.046)
     
     plt.tight_layout()
-    plt.show()
+    
+    filename = f"{filename_prefix}_{effect_type.lower().replace(' ', '_')}.png"
+    return save_plot(filename)
+
+def plot_training_curves(
+    curves_dict: Dict[str, List[float]], 
+    title: str = "Training Curves",
+    xlabel: str = "Epoch",
+    ylabel: str = "Loss",
+    filename_prefix: str = "training_curves"
+) -> str:
+    """
+    Plot training curves comparison.
+    
+    Args:
+        curves_dict: Dictionary mapping curve names to loss values
+        title: Plot title
+        xlabel: X-axis label
+        ylabel: Y-axis label
+        filename_prefix: Prefix for saved filename
+        
+    Returns:
+        Path to saved plot file
+    """
+    plt.figure(figsize=(10, 6))
+    
+    for name, values in curves_dict.items():
+        plt.plot(values, linewidth=2, label=name)
+    
+    plt.title(title)
+    plt.xlabel(xlabel)
+    plt.ylabel(ylabel)
+    plt.legend()
+    plt.grid(True, alpha=0.3)
+    
+    filename = f"{filename_prefix}.png"
+    return save_plot(filename)
+
+def plot_gradient_analysis(
+    gradients_dict: Dict[str, np.ndarray],
+    title: str = "Gradient Analysis",
+    filename_prefix: str = "gradient_analysis"
+) -> str:
+    """
+    Plot gradient flow analysis.
+    
+    Args:
+        gradients_dict: Dictionary mapping method names to gradient values
+        title: Plot title
+        filename_prefix: Prefix for saved filename
+        
+    Returns:
+        Path to saved plot file
+    """
+    fig, axes = plt.subplots(1, 2, figsize=(12, 5))
+    
+    # Plot gradient flow over layers
+    axes[0].set_title('Gradient Flow Through Layers')
+    for name, gradients in gradients_dict.items():
+        axes[0].plot(gradients, linewidth=2, label=name)
+    axes[0].set_xlabel('Layer')
+    axes[0].set_ylabel('Gradient Magnitude')
+    axes[0].legend()
+    axes[0].grid(True, alpha=0.3)
+    axes[0].set_yscale('log')
+    
+    # Plot final gradient comparison
+    final_gradients = [gradients[-1] for gradients in gradients_dict.values()]
+    names = list(gradients_dict.keys())
+    
+    axes[1].bar(names, final_gradients, alpha=0.7)
+    axes[1].set_title('Final Gradient Comparison')
+    axes[1].set_ylabel('Final Gradient Magnitude')
+    axes[1].tick_params(axis='x', rotation=45)
+    axes[1].set_yscale('log')
+    
+    plt.suptitle(title)
+    plt.tight_layout()
+    
+    filename = f"{filename_prefix}.png"
+    return save_plot(filename)

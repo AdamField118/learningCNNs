@@ -6,8 +6,9 @@ and customized kernels for astronomical applications.
 """
 
 import numpy as np
+from typing import Tuple
 
-def sobel_x_kernel():
+def sobel_x_kernel() -> np.ndarray:
     """
     Sobel kernel for detecting horizontal edges (vertical gradients).
     
@@ -22,7 +23,7 @@ def sobel_x_kernel():
                      [-2, 0, 2],
                      [-1, 0, 1]], dtype=np.float32)
 
-def sobel_y_kernel():
+def sobel_y_kernel() -> np.ndarray:
     """
     Sobel kernel for detecting vertical edges (horizontal gradients).
     
@@ -33,19 +34,29 @@ def sobel_y_kernel():
                      [ 0,  0,  0],
                      [ 1,  2,  1]], dtype=np.float32)
 
-def prewitt_x_kernel():
-    """Prewitt kernel for horizontal edge detection."""
+def prewitt_x_kernel() -> np.ndarray:
+    """
+    Prewitt kernel for horizontal edge detection.
+    
+    Returns:
+        3x3 numpy array representing the Prewitt X kernel
+    """
     return np.array([[-1, 0, 1],
                      [-1, 0, 1],
                      [-1, 0, 1]], dtype=np.float32)
 
-def prewitt_y_kernel():
-    """Prewitt kernel for vertical edge detection."""
+def prewitt_y_kernel() -> np.ndarray:
+    """
+    Prewitt kernel for vertical edge detection.
+    
+    Returns:
+        3x3 numpy array representing the Prewitt Y kernel
+    """
     return np.array([[-1, -1, -1],
                      [ 0,  0,  0],
                      [ 1,  1,  1]], dtype=np.float32)
 
-def laplacian_kernel():
+def laplacian_kernel() -> np.ndarray:
     """
     Laplacian kernel for edge detection (detects all edge orientations).
     
@@ -59,3 +70,18 @@ def laplacian_kernel():
     return np.array([[ 0, -1,  0],
                      [-1,  4, -1],
                      [ 0, -1,  0]], dtype=np.float32)
+
+def get_all_edge_kernels() -> dict[str, np.ndarray]:
+    """
+    Get all available edge detection kernels.
+    
+    Returns:
+        Dictionary mapping kernel names to kernel arrays
+    """
+    return {
+        'sobel_x': sobel_x_kernel(),
+        'sobel_y': sobel_y_kernel(),
+        'prewitt_x': prewitt_x_kernel(),
+        'prewitt_y': prewitt_y_kernel(),
+        'laplacian': laplacian_kernel()
+    }

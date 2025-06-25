@@ -9,12 +9,14 @@ import numpy as np
 import matplotlib.pyplot as plt
 import sys
 import os
+from typing import List
 
 # Path setup
 current_dir = os.path.dirname(os.path.abspath(__file__))
 parent_dir = os.path.dirname(current_dir)
 sys.path.insert(0, parent_dir)
 
+from utils.output_system import log_print, log_experiment_start, log_experiment_end, save_plot
 from utils.test_data import create_synthetic_galaxy
 from day01.neural_network_foundations import activation_function_sigmoid
 from day06.activation_functions import ModernActivations
@@ -181,7 +183,7 @@ class GalaxyAttentionNetwork:
         self.spatial_attention = SpatialAttention(num_feature_channels)   # Create spatial attention
         self.channel_attention = ChannelAttention(num_feature_channels)   # Create channel attention
         
-    def _create_edge_kernels(self):
+    def _create_edge_kernels(self) -> dict[str, np.ndarray]:
         """Create edge detection kernels for feature extraction."""
         # Create multiple edge detection kernels
         # These will create our initial feature channels
@@ -193,7 +195,7 @@ class GalaxyAttentionNetwork:
         }
         return kernels
     
-    def extract_features(self, galaxy_image):
+    def extract_features(self, galaxy_image) -> np.ndarray:
         """Extract multi-channel features from galaxy."""
         from day02.edge_detection_basics import manual_convolution_2d
         
@@ -210,7 +212,7 @@ class GalaxyAttentionNetwork:
         
         return feature_map
     
-    def forward(self, galaxy_image):
+    def forward(self, galaxy_image) -> dict[str, np.ndarray]:
         """
         Forward pass with attention mechanisms.
         
@@ -237,7 +239,7 @@ class GalaxyAttentionNetwork:
             'spatial_attention': spatial_weights
         }
 
-def demonstrate_attention_concept():
+def demonstrate_attention_concept() -> None:
     """
     Demonstrate the core concept of attention with a simple example.
     """
@@ -309,29 +311,29 @@ def demonstrate_attention_concept():
                 f'{val:.3f}', ha='center', va='bottom')
     
     plt.tight_layout()
-    plt.show()
+    save_plot('demonstrate attention concept.png')
     
-    print(f"Uniform average: {uniform_output:.3f}")
-    print(f"Attention-weighted: {attended_output:.3f}")
-    print(f"Difference: {abs(attended_output - uniform_output):.3f}")
+    log_print(f"Uniform average: {uniform_output:.3f}")
+    log_print(f"Attention-weighted: {attended_output:.3f}")
+    log_print(f"Difference: {abs(attended_output - uniform_output):.3f}")
     
-    print("\nKey Insight:")
-    print("- Attention allows the network to focus on important positions!")
-    print("- Instead of treating all inputs equally, it learns what matters")
-    print("- The attention weights sum to 1.0, ensuring proper normalization")
-    print(f"- Attention weights sum: {np.sum(attention_weights):.6f}")
+    log_print("\nKey Insight:")
+    log_print("- Attention allows the network to focus on important positions!")
+    log_print("- Instead of treating all inputs equally, it learns what matters")
+    log_print("- The attention weights sum to 1.0, ensuring proper normalization")
+    log_print(f"- Attention weights sum: {np.sum(attention_weights):.6f}")
     
     # Show which positions got highest attention
     top_positions = np.argsort(attention_weights)[-3:][::-1]
-    print(f"\nTop 3 attended positions: {top_positions}")
+    log_print(f"\nTop 3 attended positions: {top_positions}")
     for pos in top_positions:
-        print(f"  Position {pos}: weight={attention_weights[pos]:.3f}, value={sequence_values[pos]:.3f}")
+        log_print(f"  Position {pos}: weight={attention_weights[pos]:.3f}, value={sequence_values[pos]:.3f}")
 
-def test_attention_on_galaxies():
+def test_attention_on_galaxies() -> dict:
     """
     Test attention mechanisms on galaxy images.
     """
-    print("=== Testing Attention on Galaxy Features ===")
+    log_print("=== Testing Attention on Galaxy Features ===")
     
     # Create different galaxy types
     galaxies = {
@@ -346,7 +348,7 @@ def test_attention_on_galaxies():
     results = {}
     
     for galaxy_type, galaxy in galaxies.items():
-        print(f"\nAnalyzing {galaxy_type} galaxy...")
+        log_print(f"\nAnalyzing {galaxy_type} galaxy...")
         
         # Process with attention
         result = attention_net.forward(galaxy)
@@ -356,24 +358,24 @@ def test_attention_on_galaxies():
         spatial_attention = result['spatial_attention']
         channel_attention = result['channel_attention']
         
-        print(f"  Spatial attention range: [{np.min(spatial_attention):.3f}, {np.max(spatial_attention):.3f}]")
-        print(f"  Spatial attention focus: {np.std(spatial_attention):.3f} (higher = more focused)")
+        log_print(f"  Spatial attention range: [{np.min(spatial_attention):.3f}, {np.max(spatial_attention):.3f}]")
+        log_print(f"  Spatial attention focus: {np.std(spatial_attention):.3f} (higher = more focused)")
         
         # Find the most attended spatial region
         max_attention_idx = np.unravel_index(np.argmax(spatial_attention), spatial_attention.shape)
         center = (spatial_attention.shape[0]//2, spatial_attention.shape[1]//2)
         distance_from_center = np.sqrt((max_attention_idx[0] - center[0])**2 + (max_attention_idx[1] - center[1])**2)
         
-        print(f"  Peak attention at: {max_attention_idx}, distance from center: {distance_from_center:.1f} pixels")
+        log_print(f"  Peak attention at: {max_attention_idx}, distance from center: {distance_from_center:.1f} pixels")
         
         # Analyze channel preferences
         channel_names = ['SobelX', 'SobelY', 'Diagonal1', 'Diagonal2']
-        print(f"  Channel preferences:")
+        log_print(f"  Channel preferences:")
         for i, (name, weight) in enumerate(zip(channel_names, channel_attention)):
-            print(f"    {name}: {weight:.3f}")
+            log_print(f"    {name}: {weight:.3f}")
         
         dominant_channel = np.argmax(channel_attention)
-        print(f"  Dominant channel: {channel_names[dominant_channel]} ({channel_attention[dominant_channel]:.3f})")
+        log_print(f"  Dominant channel: {channel_names[dominant_channel]} ({channel_attention[dominant_channel]:.3f})")
         
         # Compute attention efficiency (how much it differs from uniform)
         uniform_spatial = np.ones_like(spatial_attention) / spatial_attention.size
@@ -381,18 +383,18 @@ def test_attention_on_galaxies():
         uniform_entropy = -np.sum(uniform_spatial * np.log(uniform_spatial + 1e-8))
         attention_efficiency = (uniform_entropy - spatial_entropy) / uniform_entropy * 100
         
-        print(f"  Attention efficiency: {attention_efficiency:.1f}% (0%=uniform, 100%=perfectly focused)")
+        log_print(f"  Attention efficiency: {attention_efficiency:.1f}% (0%=uniform, 100%=perfectly focused)")
     
     # Visualize attention maps
     visualize_attention_maps(galaxies, results)
     
     return results
 
-def visualize_attention_maps(galaxies, attention_results):
+def visualize_attention_maps(galaxies, attention_results) -> None:
     """
     Visualize where the attention mechanism focuses.
     """
-    print("\n=== Visualizing Galaxy Attention Maps ===")
+    log_print("\n=== Visualizing Galaxy Attention Maps ===")
     
     # Create comprehensive attention visualization
     fig, axes = plt.subplots(len(galaxies), 5, figsize=(20, 4*len(galaxies)))
@@ -445,11 +447,11 @@ def visualize_attention_maps(galaxies, attention_results):
                            f'{weight:.3f}', ha='center', va='bottom', fontsize=9)
     
     plt.tight_layout()
-    plt.show()
+    save_plot('visualizing galaxy attention maps.png')
     
     # Analyze what the network learned to focus on
-    print("\nDetailed Attention Analysis:")
-    print("=" * 60)
+    log_print("\nDetailed Attention Analysis:")
+    log_print("=" * 60)
     
     for galaxy_type, result in attention_results.items():
         spatial_att = result['spatial_attention']
@@ -471,17 +473,17 @@ def visualize_attention_maps(galaxies, attention_results):
         total_pixels = spatial_att.size
         focus_percentage = focused_region_size / total_pixels * 100
         
-        print(f"\n{galaxy_type.title()} Galaxy Analysis:")
-        print(f"  Attention peak at: {max_attention_pos} (center: {center})")
-        print(f"  Attention center of mass: ({attention_mass_center[0]:.1f}, {attention_mass_center[1]:.1f})")
-        print(f"  Top 5% attention covers: {focus_percentage:.1f}% of pixels")
-        print(f"  Channel preferences:")
+        log_print(f"\n{galaxy_type.title()} Galaxy Analysis:")
+        log_print(f"  Attention peak at: {max_attention_pos} (center: {center})")
+        log_print(f"  Attention center of mass: ({attention_mass_center[0]:.1f}, {attention_mass_center[1]:.1f})")
+        log_print(f"  Top 5% attention covers: {focus_percentage:.1f}% of pixels")
+        log_print(f"  Channel preferences:")
         
         channel_names = ['SobelX (vertical edges)', 'SobelY (horizontal edges)', 
                         'Diagonal1 (NE-SW edges)', 'Diagonal2 (NW-SE edges)']
         
         for i, (name, weight) in enumerate(zip(channel_names, channel_att)):
-            print(f"    {weight:.3f} - {name}")
+            log_print(f"    {weight:.3f} - {name}")
         
         # Determine what the network is focusing on
         most_important_channel = np.argmax(channel_att)
@@ -494,7 +496,7 @@ def visualize_attention_maps(galaxies, attention_results):
         else:
             focus_type = "opposite diagonal structures (complex galaxy features)"
         
-        print(f"  Primary focus: {focus_type}")
+        log_print(f"  Primary focus: {focus_type}")
         
         # Spatial focus analysis
         if np.linalg.norm(attention_mass_center - np.array(center)) < 3:
@@ -502,13 +504,13 @@ def visualize_attention_maps(galaxies, attention_results):
         else:
             spatial_focus = "off-center regions (spiral arms/disk features)"
         
-        print(f"  Spatial focus: {spatial_focus}")
+        log_print(f"  Spatial focus: {spatial_focus}")
 
-def attention_for_shear_measurement():
+def attention_for_shear_measurement() -> None:
     """
     Demonstrate how attention helps with galaxy shear measurement.
     """
-    print("=== Attention for Galaxy Shear Measurement ===")
+    log_print("=== Attention for Galaxy Shear Measurement ===")
     
     # Create galaxies with different characteristics
     galaxies = {
@@ -518,13 +520,13 @@ def attention_for_shear_measurement():
     
     attention_net = GalaxyAttentionNetwork()
     
-    print("Benefits of attention for weak lensing shear measurement:")
-    print("=" * 55)
-    print("1. Focus on galaxy edges (most sensitive to shape distortion)")
-    print("2. Ignore background noise and irrelevant PSF artifacts")
-    print("3. Adaptively weight different galaxy regions by S/N ratio")
-    print("4. Improve precision for subtle ellipticity measurements")
-    print("5. Learn optimal feature combinations for g1/g2 estimation")
+    log_print("Benefits of attention for weak lensing shear measurement:")
+    log_print("=" * 55)
+    log_print("1. Focus on galaxy edges (most sensitive to shape distortion)")
+    log_print("2. Ignore background noise and irrelevant PSF artifacts")
+    log_print("3. Adaptively weight different galaxy regions by S/N ratio")
+    log_print("4. Improve precision for subtle ellipticity measurements")
+    log_print("5. Learn optimal feature combinations for g1/g2 estimation")
     
     shear_results = {}
     
@@ -544,9 +546,9 @@ def attention_for_shear_measurement():
             'result': result
         }
         
-        print(f"\n{name.title()} Galaxy:")
-        print(f"  Spatial focus strength: {spatial_focus:.3f}")
-        print(f"  Effective S/N for shear: {signal_to_noise:.1f}")
+        log_print(f"\n{name.title()} Galaxy:")
+        log_print(f"  Spatial focus strength: {spatial_focus:.3f}")
+        log_print(f"  Effective S/N for shear: {signal_to_noise:.1f}")
     
     # Visualize shear measurement benefits
     plt.figure(figsize=(16, 8))
@@ -584,137 +586,139 @@ def attention_for_shear_measurement():
         plt.axis('off')
     
     plt.tight_layout()
-    plt.show()
+    save_plot('attention for shear measurement.png')
     
-    print("\nConnection to Real Shear Measurement Pipelines:")
-    print("-" * 50)
-    print("Traditional approach:")
-    print("  • Fixed weighting schemes (Gaussian, optimal)")
-    print("  • Manual feature engineering")
-    print("  • Separate noise estimation step")
+    log_print("\nConnection to Real Shear Measurement Pipelines:")
+    log_print("-" * 50)
+    log_print("Traditional approach:")
+    log_print("- Fixed weighting schemes (Gaussian, optimal)")
+    log_print("- Manual feature engineering")
+    log_print("- Separate noise estimation step")
     
-    print("\nAttention-enhanced approach:")
-    print("  • Learned adaptive weighting")
-    print("  • End-to-end feature learning")
-    print("  • Implicit noise handling")
+    log_print("\nAttention-enhanced approach:")
+    log_print("- Learned adaptive weighting")
+    log_print("- End-to-end feature learning")
+    log_print("- Implicit noise handling")
     
-    print("\nPotential Improvements for ShearNet:")
-    print("  1. Add spatial attention before final regression layers")
-    print("  2. Use channel attention to weight different filter responses")
-    print("  3. Train attention jointly with g1/g2 prediction")
-    print("  4. Could improve systematic error control")
+    log_print("\nPotential Improvements for ShearNet:")
+    log_print("  1. Add spatial attention before final regression layers")
+    log_print("  2. Use channel attention to weight different filter responses")
+    log_print("  3. Train attention jointly with g1/g2 prediction")
+    log_print("  4. Could improve systematic error control")
     
-    print("\nImplementation Considerations:")
-    print("  • Attention adds computational overhead (~20-30%)")
-    print("  • Need careful regularization to avoid overfitting")
-    print("  • Validate that attention focuses on physically meaningful regions")
-    print("  • Test robustness across different galaxy morphologies")
+    log_print("\nImplementation Considerations:")
+    log_print("- Attention adds computational overhead (~20-30%)")
+    log_print("- Need careful regularization to avoid overfitting")
+    log_print("- Validate that attention focuses on physically meaningful regions")
+    log_print("- Test robustness across different galaxy morphologies")
 
-def modern_attention_insights():
+def modern_attention_insights() -> None:
     """
     Connect spatial attention to modern Transformer attention.
     """
-    print("=== Modern Attention Insights ===")
-    print("Connecting classical CV attention to modern architectures")
+    log_print("=== Modern Attention Insights ===")
+    log_print("Connecting classical CV attention to modern architectures")
     
-    print("\nSpatial Attention (implemented in this module):")
-    print("  Purpose: WHERE to look in an image")
-    print("  Method: Learns spatial importance maps")
-    print("  Best for: Localized features (galaxy spiral arms, edges)")
-    print("  Complexity: O(HxW) attention weights")
-    print("  Memory: Low - single attention map")
+    log_print("\nSpatial Attention (implemented in this module):")
+    log_print("  Purpose: WHERE to look in an image")
+    log_print("  Method: Learns spatial importance maps")
+    log_print("  Best for: Localized features (galaxy spiral arms, edges)")
+    log_print("  Complexity: O(HxW) attention weights")
+    log_print("  Memory: Low - single attention map")
     
-    print("\nChannel Attention (Squeeze-and-Excitation style):")
-    print("  Purpose: WHICH features are important")
-    print("  Method: Learns feature channel weights via global pooling")
-    print("  Best for: Feature selection and weighting")
-    print("  Complexity: O(C) attention weights")
-    print("  Memory: Very low - one weight per channel")
+    log_print("\nChannel Attention (Squeeze-and-Excitation style):")
+    log_print("  Purpose: WHICH features are important")
+    log_print("  Method: Learns feature channel weights via global pooling")
+    log_print("  Best for: Feature selection and weighting")
+    log_print("  Complexity: O(C) attention weights")
+    log_print("  Memory: Very low - one weight per channel")
     
-    print("\nSelf-Attention (Transformer-style):")
-    print("  Purpose: HOW different parts relate to each other")
-    print("  Method: Learns pairwise relationships between all positions")
-    print("  Best for: Long-range dependencies, global context")
-    print("  Complexity: O(N²) where N = HxWxC")
-    print("  Memory: High - quadratic in sequence length")
+    log_print("\nSelf-Attention (Transformer-style):")
+    log_print("  Purpose: HOW different parts relate to each other")
+    log_print("  Method: Learns pairwise relationships between all positions")
+    log_print("  Best for: Long-range dependencies, global context")
+    log_print("  Complexity: O(N²) where N = HxWxC")
+    log_print("  Memory: High - quadratic in sequence length")
     
     # Compare computational complexity
-    print("\nComputational Complexity Comparison:")
-    print("  (Assuming 48x48 galaxy images with 4 feature channels)")
+    log_print("\nComputational Complexity Comparison:")
+    log_print("  (Assuming 48x48 galaxy images with 4 feature channels)")
     
     H, W, C = 48, 48, 4
     spatial_ops = H * W
     channel_ops = C
     self_attn_ops = (H * W) ** 2
     
-    print(f"  Spatial Attention:     {spatial_ops:,} operations")
-    print(f"  Channel Attention:     {channel_ops:,} operations")
-    print(f"  Self-Attention:        {self_attn_ops:,} operations")
-    print(f"  Self-Attention is {self_attn_ops // spatial_ops}x more expensive!")
+    log_print(f"  Spatial Attention:     {spatial_ops:,} operations")
+    log_print(f"  Channel Attention:     {channel_ops:,} operations")
+    log_print(f"  Self-Attention:        {self_attn_ops:,} operations")
+    log_print(f"  Self-Attention is {self_attn_ops // spatial_ops}x more expensive!")
     
-    print("\nApplication to Different Astronomical Tasks:")
-    print("  Galaxy Classification:")
-    print("    ✓ Spatial: Focus on spiral arms vs smooth regions")
-    print("    ✓ Channel: Weight texture vs edge features")
-    print("    ⚠ Self: Overkill, adds unnecessary complexity")
+    log_print("\nApplication to Different Astronomical Tasks:")
+    log_print("  Galaxy Classification:")
+    log_print("    Spatial: Focus on spiral arms vs smooth regions")
+    log_print("    Channel: Weight texture vs edge features")
+    log_print("    Self: Overkill, adds unnecessary complexity")
     
-    print("\n  Weak Lensing Shear Measurement:")
-    print("    ✓ Spatial: Focus on high S/N galaxy regions")
-    print("    ✓ Channel: Weight different edge orientations")
-    print("    ⚠ Self: Too expensive for precision requirements")
+    log_print("\n  Weak Lensing Shear Measurement:")
+    log_print("    Spatial: Focus on high S/N galaxy regions")
+    log_print("    Channel: Weight different edge orientations")
+    log_print("    Self: Too expensive for precision requirements")
     
-    print("\n  Multi-Galaxy Scene Analysis:")
-    print("    ✓ Spatial: Segment individual galaxies")
-    print("    ✓ Channel: Different features for different galaxy types")
-    print("    ✓ Self: Model galaxy-galaxy interactions")
+    log_print("\n  Multi-Galaxy Scene Analysis:")
+    log_print("    Spatial: Segment individual galaxies")
+    log_print("    Channel: Different features for different galaxy types")
+    log_print("    Self: Model galaxy-galaxy interactions")
     
-    print("\nEvolution to Vision Transformers (ViTs):")
-    print("  • ViTs divide image into patches (e.g., 16x16 pixels)")
-    print("  • Each patch becomes a 'token' in the sequence")
-    print("  • Self-attention relates every patch to every other patch")
-    print("  • Very powerful but computationally expensive")
+    log_print("\nEvolution to Vision Transformers (ViTs):")
+    log_print(" - ViTs divide image into patches (e.g., 16x16 pixels)")
+    log_print(" - Each patch becomes a 'token' in the sequence")
+    log_print(" - Self-attention relates every patch to every other patch")
+    log_print(" - Very powerful but computationally expensive")
     
-    print("\n  For 48x48 galaxy images with 8x8 patches:")
+    log_print("\n  For 48x48 galaxy images with 8x8 patches:")
     patches = (H // 8) * (W // 8)
     vit_ops = patches ** 2
-    print(f"    Patches: {patches} ({H//8}x{W//8})")
-    print(f"    ViT operations: {vit_ops:,}")
-    print(f"    Much more manageable than pixel-level self-attention!")
+    log_print(f"    Patches: {patches} ({H//8}x{W//8})")
+    log_print(f"    ViT operations: {vit_ops:,}")
+    log_print(f"    Much more manageable than pixel-level self-attention!")
     
-    print("\nRecommendations for Galaxy Analysis:")
-    print("  Start simple: Spatial + Channel attention")
-    print("    • Lower computational cost")
-    print("    • Easier to interpret and debug")
-    print("    • Often sufficient for astronomy tasks")
+    log_print("\nRecommendations for Galaxy Analysis:")
+    log_print("  Start simple: Spatial + Channel attention")
+    log_print("   - Lower computational cost")
+    log_print("   - Easier to interpret and debug")
+    log_print("   - Often sufficient for astronomy tasks")
     
-    print("\n  Consider self-attention for:")
-    print("    • Very large images (>256x256)")
-    print("    • Complex multi-object scenes")
-    print("    • When you have abundant computational resources")
-    print("    • Tasks requiring global context understanding")
+    log_print("\n  Consider self-attention for:")
+    log_print("   - Very large images (>256x256)")
+    log_print("   - Complex multi-object scenes")
+    log_print("   - When you have abundant computational resources")
+    log_print("   - Tasks requiring global context understanding")
     
-    print("\nFurther Reading:")
-    print("  • 'Attention Is All You Need' (Vaswani et al.) - Original Transformer")
-    print("  • 'An Image is Worth 16x16 Words' (Dosovitskiy et al.) - Vision Transformer")
-    print("  • 'Squeeze-and-Excitation Networks' (Hu et al.) - Channel attention")
-    print("  • 'CBAM: Convolutional Block Attention Module' - Combined spatial/channel")
+    log_print("\nFurther Reading:")
+    log_print(" - 'Attention Is All You Need' (Vaswani et al.) - Original Transformer")
+    log_print(" - 'An Image is Worth 16x16 Words' (Dosovitskiy et al.) - Vision Transformer")
+    log_print(" - 'Squeeze-and-Excitation Networks' (Hu et al.) - Channel attention")
+    log_print(" - 'CBAM: Convolutional Block Attention Module' - Combined spatial/channel")
 
 if __name__ == "__main__":
-    print("Day 6: Attention Mechanisms for Galaxy Analysis!")
-    print("Learning to focus on what matters in astronomical images")
+    log_experiment_start(6, "Attention Mechanisms for Galaxy Analysis!")
+    log_print("Learning to focus on what matters in astronomical images")
     
     # Core concept
-    print("\n" + "="*60)
+    log_print("\n" + "="*60)
     demonstrate_attention_concept()
     
     # Apply to galaxies
-    print("\n" + "="*60)
+    log_print("\n" + "="*60)
     test_attention_on_galaxies()
     
     # Research applications
-    print("\n" + "="*60)
+    log_print("\n" + "="*60)
     attention_for_shear_measurement()
     
     # Modern connections
-    print("\n" + "="*60)
+    log_print("\n" + "="*60)
     modern_attention_insights()
+
+    log_experiment_end(6)

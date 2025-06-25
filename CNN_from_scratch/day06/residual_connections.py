@@ -9,12 +9,14 @@ import numpy as np
 import matplotlib.pyplot as plt
 import sys
 import os
+from typing import Any
 
 # Path setup
 current_dir = os.path.dirname(os.path.abspath(__file__))
 parent_dir = os.path.dirname(current_dir)
 sys.path.insert(0, parent_dir)
 
+from utils.output_system import log_print, log_experiment_start, log_experiment_end, save_plot
 from utils.test_data import create_synthetic_galaxy
 from utils.visualization import plot_feature_responses
 from day02.edge_detection_basics import manual_convolution_2d
@@ -49,7 +51,7 @@ class ResidualBlock:
         # Initialize all weights
         self._initialize_weights()
 
-    def _initialize_weights(self):
+    def _initialize_weights(self) -> None:
         """Initialize weights with proper scaling for gradient flow."""
         # Xavier/He initialization for better gradient flow
         # For ReLU networks, He initialization works better: std = sqrt(2/fan_in)
@@ -69,7 +71,7 @@ class ResidualBlock:
             # In real implementations, this would be a 1x1 conv
             self.skip_weights = np.random.randn(1, 1) * np.sqrt(2.0 / self.input_channels)
 
-    def forward(self, x):
+    def forward(self, x) -> (np.ndarray | float) :
         """
         Forward pass through residual block.
 
@@ -116,13 +118,13 @@ class ResidualBlock:
 
         return final_output
 
-def demonstrate_vanishing_gradients():
+def demonstrate_vanishing_gradients() -> None:
     """
     Demonstrate the vanishing gradient problem with deep networks.
 
     This shows why we need residual connections for deep networks.
     """
-    print("=== Demonstrating Vanishing Gradient Problem ===")
+    log_print("=== Demonstrating Vanishing Gradient Problem ===")
 
     # Create a simple deep network simulation
     # Simulate gradients flowing backward through many layers
@@ -178,25 +180,25 @@ def demonstrate_vanishing_gradients():
     plt.yscale('log')
 
     plt.tight_layout()
-    plt.show()
+    save_plot('demonstrate vanishing gradients.png')
 
-    print("Without residual connections:")
-    print(f"Initial gradient: {initial_gradient}")
-    print(f"Final gradient: {gradients_without_residual[-1]:.6f}")
+    log_print("Without residual connections:")
+    log_print(f"Initial gradient: {initial_gradient}")
+    log_print(f"Final gradient: {gradients_without_residual[-1]:.6f}")
 
-    print("\nWith residual connections:")
-    print(f"Final gradient: {gradients_with_residual[-1]:.6f}")
+    log_print("\nWith residual connections:")
+    log_print(f"Final gradient: {gradients_with_residual[-1]:.6f}")
 
     improvement_factor = gradients_with_residual[-1] / gradients_without_residual[-1]
-    print(f"Improvement factor: {improvement_factor:.2f}x")
+    log_print(f"Improvement factor: {improvement_factor:.2f}x")
 
-def test_residual_vs_plain_network():
+def test_residual_vs_plain_network() -> None:
     """
     Compare a plain deep network vs one with residual connections.
 
     This demonstrates why ResNet was revolutionary.
     """
-    print("=== Residual vs Plain Network Comparison ===")
+    log_print("=== Residual vs Plain Network Comparison ===")
 
     galaxy = create_synthetic_galaxy(size=50, spiral_arms=True)
 
@@ -221,38 +223,38 @@ def test_residual_vs_plain_network():
             try:
                 current = manual_convolution_2d(current, kernel)
                 current = activation_function_relu(current)
-                print(f"  Plain Layer {i+1}: {current.shape}, max={np.max(current):.3f}")
+                log_print(f"  Plain Layer {i+1}: {current.shape}, max={np.max(current):.3f}")
             except:
-                print(f"  Plain Layer {i+1}: Failed (too small)")
+                log_print(f"  Plain Layer {i+1}: Failed (too small)")
                 break
 
         return current
 
     # Create a residual network
-    def residual_network(image):
+    def residual_network(image) -> (Any | np.ndarray | float) :
         """Apply multiple convolutions WITH skip connections."""
         # Apply the same number of layers but with residual blocks
         # Each block should maintain the skip connection
 
-        print("  Residual Network:")
+        log_print("  Residual Network:")
         residual_block = ResidualBlock(input_channels=1, output_channels=1)
 
         current = image
         for i in range(3):  # Fewer layers due to size constraints
             try:
                 current = residual_block.forward(current)
-                print(f"  Residual Block {i+1}: {current.shape}, max={np.max(current):.3f}")
+                log_print(f"  Residual Block {i+1}: {current.shape}, max={np.max(current):.3f}")
             except Exception as e:
-                print(f"  Residual Block {i+1}: Failed - {str(e)}")
+                log_print(f"  Residual Block {i+1}: Failed - {str(e)}")
                 break
 
         return current
 
     # Compare the outputs
-    print("Plain Network:")
+    log_print("Plain Network:")
     plain_result = plain_deep_network(galaxy)
 
-    print("\nResidual Network:")
+    log_print("\nResidual Network:")
     residual_result = residual_network(galaxy)
 
     # Visualize the difference
@@ -261,17 +263,17 @@ def test_residual_vs_plain_network():
         'Residual Network': residual_result
     }, title="Plain vs Residual Network Comparison")
 
-    print(f"\nPlain network final response: {np.max(np.abs(plain_result)):.3f}")
-    print(f"Residual network final response: {np.max(np.abs(residual_result)):.3f}")
-    print("Residual network maintains stronger signal through deeper layers!")
+    log_print(f"\nPlain network final response: {np.max(np.abs(plain_result)):.3f}")
+    log_print(f"Residual network final response: {np.max(np.abs(residual_result)):.3f}")
+    log_print("Residual network maintains stronger signal through deeper layers!")
 
-def residual_connections_for_galaxies():
+def residual_connections_for_galaxies() -> None :
     """
     Explore how residual connections help with galaxy feature detection.
 
     This connects residual connections to astronomical applications.
     """
-    print("=== Residual Connections for Galaxy Analysis ===")
+    log_print("=== Residual Connections for Galaxy Analysis ===")
 
     galaxy = create_synthetic_galaxy(size=48, spiral_arms=True)
 
@@ -303,54 +305,54 @@ def residual_connections_for_galaxies():
         'Layer 2: With Residual': layer2_with_residual
     }, title="Residual Connections for Galaxy Feature Preservation")
 
-    print("Key insight: Galaxy shear measurement needs BOTH:")
-    print("1. Low-level edge information (precise shape)")
-    print("2. High-level structural information (galaxy type)")
-    print("Residual connections preserve both!")
+    log_print("Key insight: Galaxy shear measurement needs BOTH:")
+    log_print("1. Low-level edge information (precise shape)")
+    log_print("2. High-level structural information (galaxy type)")
+    log_print("Residual connections preserve both!")
 
     # Analyze signal preservation
     edge_signal = np.max(np.abs(layer1_features))
     without_residual_signal = np.max(np.abs(layer2_without_residual))
     with_residual_signal = np.max(np.abs(layer2_with_residual))
 
-    print(f"\nSignal preservation analysis:")
-    print(f"Layer 1 (edges): {edge_signal:.3f}")
-    print(f"Layer 2 without residual: {without_residual_signal:.3f} ({without_residual_signal/edge_signal:.1%} preserved)")
-    print(f"Layer 2 with residual: {with_residual_signal:.3f} ({with_residual_signal/edge_signal:.1%} preserved)")
+    log_print(f"\nSignal preservation analysis:")
+    log_print(f"Layer 1 (edges): {edge_signal:.3f}")
+    log_print(f"Layer 2 without residual: {without_residual_signal:.3f} ({without_residual_signal/edge_signal:.1%} preserved)")
+    log_print(f"Layer 2 with residual: {with_residual_signal:.3f} ({with_residual_signal/edge_signal:.1%} preserved)")
 
-def why_resnet_revolutionized_deep_learning():
+def why_resnet_revolutionized_deep_learning() -> None :
     """
     Explain the historical impact and key insights of ResNet.
     """
-    print("=== Why ResNet Changed Everything ===")
+    log_print("=== Why ResNet Changed Everything ===")
 
-    print("Before ResNet (2015):")
-    print("- Networks deeper than ~20 layers performed WORSE")
-    print("- Not due to overfitting - even training error increased!")
-    print("- Vanishing gradients made deep networks untrainable")
+    log_print("Before ResNet (2015):")
+    log_print("- Networks deeper than ~20 layers performed WORSE")
+    log_print("- Not due to overfitting - even training error increased!")
+    log_print("- Vanishing gradients made deep networks untrainable")
 
-    print("\nResNet's insight:")
-    print("- Let layers learn residual function F(x) = H(x) - x")
-    print("- Identity mapping is easier to learn than complex mapping")
-    print("- Skip connections provide gradient superhighway")
+    log_print("\nResNet's insight:")
+    log_print("- Let layers learn residual function F(x) = H(x) - x")
+    log_print("- Identity mapping is easier to learn than complex mapping")
+    log_print("- Skip connections provide gradient superhighway")
 
-    print("\nImpact:")
-    print("- Enabled 50, 101, even 1000+ layer networks")
-    print("- Dramatic improvements in image recognition")
-    print("- Foundation for modern architectures (Transformers use similar ideas)")
+    log_print("\nImpact:")
+    log_print("- Enabled 50, 101, even 1000+ layer networks")
+    log_print("- Dramatic improvements in image recognition")
+    log_print("- Foundation for modern architectures (Transformers use similar ideas)")
 
     # Show the mathematical insight
-    print("\nMathematical insight:")
-    print("Traditional layer: H(x) = F(weight*x + bias)")
-    print("Residual layer: H(x) = F(weight*x + bias) + x")
-    print("If optimal mapping is close to identity, F can learn small corrections")
+    log_print("\nMathematical insight:")
+    log_print("Traditional layer: H(x) = F(weight*x + bias)")
+    log_print("Residual layer: H(x) = F(weight*x + bias) + x")
+    log_print("If optimal mapping is close to identity, F can learn small corrections")
 
-def visualize_residual_flow():
+def visualize_residual_flow() -> None :
     """
     Create a visualization showing how information flows
     through residual connections vs plain connections.
     """
-    print("=== Visualizing Residual Information Flow ===")
+    log_print("=== Visualizing Residual Information Flow ===")
 
     # Create a simple demonstration
     galaxy = create_synthetic_galaxy(size=40, spiral_arms=True)
@@ -377,9 +379,11 @@ def visualize_residual_flow():
     plot_feature_responses(galaxy, layer_outputs, 
                          title="Information Flow: Plain vs Residual Networks")
 
-    print("Notice how residual connections maintain signal strength!")
+    log_print("Notice how residual connections maintain signal strength!")
 
 if __name__ == "__main__":
+    log_experiment_start(6, 'Residual Connections')
+
     # Start with the problem
     demonstrate_vanishing_gradients()
 
@@ -394,3 +398,5 @@ if __name__ == "__main__":
 
     # Visualization
     visualize_residual_flow()
+
+    log_experiment_end(6)

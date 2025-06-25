@@ -21,6 +21,7 @@ sys.path.insert(0, parent_dir)
 
 from utils.test_data import create_synthetic_galaxy
 from utils.visualization import plot_feature_responses
+from utils.output_system import log_print, log_experiment_start, log_experiment_end
 from kernels.edge_detection_kernels import sobel_x_kernel, sobel_y_kernel
 from day02.edge_detection_basics import manual_convolution_2d
 
@@ -208,4 +209,8 @@ def test_kernel_comparison():
     }, title="Astronomical Kernel Comparison")
 
 if __name__ == "__main__":
+    log_experiment_start(3, "kernel designs in galaxy images")
+    
     test_kernel_comparison()
+    
+    log_experiment_end(3)

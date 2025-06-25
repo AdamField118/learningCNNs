@@ -17,6 +17,7 @@ sys.path.insert(0, parent_dir)
 
 from utils.test_data import create_synthetic_galaxy
 from day01.neural_network_foundations import activation_function_relu, activation_function_sigmoid
+from utils.output_system import log_print, log_experiment_start, log_experiment_end, save_plot
 
 class ModernActivations:
     """
@@ -27,7 +28,7 @@ class ModernActivations:
     """
     
     @staticmethod
-    def swish(x, beta=1.0):
+    def swish(x, beta=1.0) -> int:
         """
         Swish activation: x * sigmoid(beta * x)
         
@@ -45,7 +46,7 @@ class ModernActivations:
         return x * activation_function_sigmoid(beta * x)
     
     @staticmethod
-    def gelu(x):
+    def gelu(x) -> int:
         """
         GELU (Gaussian Error Linear Unit): x * Φ(x)
         Where Φ(x) is the CDF of standard normal distribution
@@ -66,7 +67,7 @@ class ModernActivations:
         return 0.5 * x * (1.0 + np.tanh(inner))
     
     @staticmethod
-    def mish(x):
+    def mish(x) -> int:
         """
         Mish activation: x * tanh(softplus(x))
         Where softplus(x) = ln(1 + exp(x))
@@ -87,7 +88,7 @@ class ModernActivations:
         return x * np.tanh(softplus)
     
     @staticmethod
-    def elu(x, alpha=1.0):
+    def elu(x, alpha=1.0) -> int:
         """
         ELU (Exponential Linear Unit)
         
@@ -105,7 +106,7 @@ class ModernActivations:
         return np.where(x > 0, x, alpha * (np.exp(x) - 1))
     
     @staticmethod
-    def leaky_relu(x, alpha=0.01):
+    def leaky_relu(x, alpha=0.01) -> int:
         """
         Leaky ReLU: allows small negative slope
         
@@ -122,11 +123,11 @@ class ModernActivations:
         # Formula: max(alpha * x, x)
         return np.maximum(alpha * x, x)
 
-def compare_activation_properties():
+def compare_activation_properties() -> None:
     """
     Compare mathematical properties of different activations.
     """
-    print("=== Activation Function Properties Comparison ===")
+    log_print("=== Activation Function Properties Comparison ===")
     
     # Create input range for testing
     x = np.linspace(-3, 3, 1000)
@@ -143,7 +144,7 @@ def compare_activation_properties():
     leaky_relu_vals = activations.leaky_relu(x)
     
     # Compute gradients (finite differences)
-    def compute_gradient(f, x_vals):
+    def compute_gradient(f, x_vals) -> np.ndarray:
         """Compute numerical gradient of function f."""
         h = 1e-5
         grad = np.zeros_like(x_vals)
@@ -244,38 +245,38 @@ def compare_activation_properties():
     axes[2, 1].tick_params(axis='x', rotation=45)
     
     plt.tight_layout()
-    plt.show()
-    
+    save_plot('compare activation properties.png')
+
     # Analyze key properties
-    print("\nKey Properties Analysis:")
-    print("ReLU: Simple, fast, but can die (gradient=0 for x<0)")
-    print("  - Zero gradient for negative inputs -> dying neurons")
-    print("  - Not zero-centered -> inefficient learning")
+    log_print("\nKey Properties Analysis:")
+    log_print("ReLU: Simple, fast, but can die (gradient=0 for x<0)")
+    log_print("  - Zero gradient for negative inputs -> dying neurons")
+    log_print("  - Not zero-centered -> inefficient learning")
     
-    print("Swish: Smooth, self-gating, non-monotonic")
-    print("  - Can decrease then increase (non-monotonic)")
-    print("  - Smooth everywhere -> better gradients")
-    print("  - Self-gating: uses own value to control activation")
+    log_print("Swish: Smooth, self-gating, non-monotonic")
+    log_print("  - Can decrease then increase (non-monotonic)")
+    log_print("  - Smooth everywhere -> better gradients")
+    log_print("  - Self-gating: uses own value to control activation")
     
-    print("GELU: Smooth, probabilistic interpretation")
-    print("  - Based on Gaussian CDF -> principled approach")
-    print("  - Used in BERT, GPT -> proven in transformers")
-    print("  - Smooth gradients help optimization")
+    log_print("GELU: Smooth, probabilistic interpretation")
+    log_print("  - Based on Gaussian CDF -> principled approach")
+    log_print("  - Used in BERT, GPT -> proven in transformers")
+    log_print("  - Smooth gradients help optimization")
     
-    print("Mish: Smooth, non-monotonic, self-regularizing")
-    print("  - Often empirically outperforms others")
-    print("  - Strong negative information preservation")
-    print("  - Self-regularizing properties")
+    log_print("Mish: Smooth, non-monotonic, self-regularizing")
+    log_print("  - Often empirically outperforms others")
+    log_print("  - Strong negative information preservation")
+    log_print("  - Self-regularizing properties")
     
-    print("ELU: Smooth, negative saturation")
-    print("  - Smooth everywhere unlike ReLU")
-    print("  - Negative saturation prevents extreme negative values")
-    print("  - Helps with vanishing gradients")
+    log_print("ELU: Smooth, negative saturation")
+    log_print("  - Smooth everywhere unlike ReLU")
+    log_print("  - Negative saturation prevents extreme negative values")
+    log_print("  - Helps with vanishing gradients")
     
-    print("Leaky ReLU: Simple fix for dying ReLU")
-    print("  - Minimal computational overhead")
-    print("  - Prevents dying neurons")
-    print("  - Good baseline modern activation")
+    log_print("Leaky ReLU: Simple fix for dying ReLU")
+    log_print("  - Minimal computational overhead")
+    log_print("  - Prevents dying neurons")
+    log_print("  - Good baseline modern activation")
 
 def test_activations_on_galaxy_features():
     """
@@ -306,9 +307,9 @@ def test_activations_on_galaxy_features():
     }
     
     # Analyze feature preservation
-    print(f"Original edge features: min={edge_features.min():.3f}, max={edge_features.max():.3f}")
-    print(f"Range: {edge_features.max() - edge_features.min():.3f}")
-    print()
+    log_print(f"Original edge features: min={edge_features.min():.3f}, max={edge_features.max():.3f}")
+    log_print(f"Range: {edge_features.max() - edge_features.min():.3f}")
+    log_print()
     
     for name, features in activated_features.items():
         if name == 'Original':
@@ -320,7 +321,7 @@ def test_activations_on_galaxy_features():
         zero_responses = np.sum(features == 0) / features.size * 100
         mean_activation = np.mean(features)
         
-        print(f"{name:12s}: range={feature_range:.3f}, negative_info={negative_info:.1f}%, " +
+        log_print(f"{name:12s}: range={feature_range:.3f}, negative_info={negative_info:.1f}%, " +
               f"strong_resp={strong_responses:.1f}%, zero_resp={zero_responses:.1f}%, mean={mean_activation:.3f}")
     
     # Visualize the differences
@@ -347,10 +348,10 @@ def test_activations_on_galaxy_features():
     axes[8].axis('off')
     
     plt.tight_layout()
-    plt.show()
+    save_plot('test activations on galaxy features.png')
     
     # Detailed analysis for galaxy applications
-    print("\nDetailed Analysis for Galaxy Applications:")
+    log_print("\nDetailed Analysis for Galaxy Applications:")
     
     # Check feature diversity (how many different activation levels)
     for name, features in activated_features.items():
@@ -359,13 +360,13 @@ def test_activations_on_galaxy_features():
         unique_vals = len(np.unique(np.round(features, 3)))
         total_vals = features.size
         diversity = unique_vals / total_vals * 100
-        print(f"{name:12s}: Feature diversity: {diversity:.1f}% ({unique_vals}/{total_vals} unique values)")
+        log_print(f"{name:12s}: Feature diversity: {diversity:.1f}% ({unique_vals}/{total_vals} unique values)")
     
-    print("\nImplications for Galaxy Analysis:")
-    print("- Higher negative info preservation → Better capture of galaxy structure variations")
-    print("- Lower zero responses → More neurons stay active (avoid dying neurons)")
-    print("- Smooth activations → Better gradient flow for precise shear measurements")
-    print("- Non-monotonic functions → Can capture complex galaxy morphologies")
+    log_print("\nImplications for Galaxy Analysis:")
+    log_print("- Higher negative info preservation -> Better capture of galaxy structure variations")
+    log_print("- Lower zero responses -> More neurons stay active (avoid dying neurons)")
+    log_print("- Smooth activations -> Better gradient flow for precise shear measurements")
+    log_print("- Non-monotonic functions -> Can capture complex galaxy morphologies")
     
     return activated_features
 
@@ -373,7 +374,7 @@ def analyze_gradient_flow():
     """
     Analyze how different activations affect gradient flow.
     """
-    print("=== Gradient Flow Analysis ===")
+    log_print("=== Gradient Flow Analysis ===")
     
     # Simulate deep network gradient flow
     initial_gradient = 1.0
@@ -395,7 +396,7 @@ def analyze_gradient_flow():
     gradient_preservation = {}
     
     for name, activation_fn in activation_functions.items():
-        print(f"Analyzing {name}...")
+        log_print(f"Analyzing {name}...")
         
         all_simulations = []
         
@@ -606,13 +607,13 @@ def analyze_gradient_flow():
             bar.set_color('red')
     
     plt.tight_layout()
-    plt.show()
+    save_plot("exploding gradient rate.png")
     
     # Report detailed results
-    print("\nGradient Preservation Results:")
-    print("=" * 70)
-    print(f"{'Activation':<12} {'Mean Final':<12} {'Stability':<12} {'Vanishing%':<12} {'Exploding%'}")
-    print("=" * 70)
+    log_print("\nGradient Preservation Results:")
+    log_print("=" * 70)
+    log_print(f"{'Activation':<12} {'Mean Final':<12} {'Stability':<12} {'Vanishing%':<12} {'Exploding%'}")
+    log_print("=" * 70)
     
     for i, (name, data) in enumerate(gradient_preservation.items()):
         mean_final = data['final_gradient_mean']
@@ -620,43 +621,43 @@ def analyze_gradient_flow():
         vanishing_pct = vanishing_rates[i]
         exploding_pct = exploding_rates[i]
         
-        print(f"{name:<12} {mean_final:<12.4f} {cv:<12.4f} {vanishing_pct:<12.1f} {exploding_pct:<12.1f}")
+        log_print(f"{name:<12} {mean_final:<12.4f} {cv:<12.4f} {vanishing_pct:<12.1f} {exploding_pct:<12.1f}")
     
-    print("\nInterpretation:")
-    print("- Mean Final: Higher values indicate better gradient preservation")
-    print("- Stability: Lower coefficient of variation indicates more consistent training")
-    print("- Vanishing%: Lower percentage indicates fewer vanishing gradient problems")
-    print("- Exploding%: Lower percentage indicates fewer exploding gradient problems")
+    log_print("\nInterpretation:")
+    log_print("- Mean Final: Higher values indicate better gradient preservation")
+    log_print("- Stability: Lower coefficient of variation indicates more consistent training")
+    log_print("- Vanishing%: Lower percentage indicates fewer vanishing gradient problems")
+    log_print("- Exploding%: Lower percentage indicates fewer exploding gradient problems")
 
 def activation_recommendations_for_research():
     """
     Provide recommendations for activation choice in galaxy analysis.
     """
-    print("=== Activation Function Recommendations ===")
+    log_print("=== Activation Function Recommendations ===")
     
-    print(" For Galaxy Shear Measurement (ShearNet-style tasks):")
-    print("1. GELU or Mish - Smooth gradients help precision tasks")
-    print("   → Better convergence for sub-pixel accuracy requirements")
-    print("2. Swish - Self-gating property good for subtle feature detection")
-    print("   → Can adaptively emphasize important features")
-    print("3. Avoid standard ReLU - Dying ReLU hurts subtle feature detection")
-    print("   → Loss of gradient information is critical for precision tasks")
+    log_print(" For Galaxy Shear Measurement (ShearNet-style tasks):")
+    log_print("1. GELU or Mish - Smooth gradients help precision tasks")
+    log_print("   -> Better convergence for sub-pixel accuracy requirements")
+    log_print("2. Swish - Self-gating property good for subtle feature detection")
+    log_print("   -> Can adaptively emphasize important features")
+    log_print("3. Avoid standard ReLU - Dying ReLU hurts subtle feature detection")
+    log_print("   -> Loss of gradient information is critical for precision tasks")
     
-    print("\n For Galaxy Classification (Morphology, redshift estimation):")
-    print("1. Swish or GELU - Good balance of performance and stability")
-    print("2. Mish - Often gives best empirical results")
-    print("3. Leaky ReLU - If computational budget is very tight")
-    print("   → Minimal overhead compared to ReLU")
+    log_print("\n For Galaxy Classification (Morphology, redshift estimation):")
+    log_print("1. Swish or GELU - Good balance of performance and stability")
+    log_print("2. Mish - Often gives best empirical results")
+    log_print("3. Leaky ReLU - If computational budget is very tight")
+    log_print("   -> Minimal overhead compared to ReLU")
     
-    print("\n For Very Deep Networks (>50 layers, ResNet-style):")
-    print("1. GELU or Mish - Best gradient flow properties")
-    print("2. Combine with:")
-    print("   - Residual connections (essential)")
-    print("   - Batch normalization")
-    print("   - Proper weight initialization")
-    print("3. Avoid ELU in very deep networks - can cause instability")
+    log_print("\n For Very Deep Networks (>50 layers, ResNet-style):")
+    log_print("1. GELU or Mish - Best gradient flow properties")
+    log_print("2. Combine with:")
+    log_print("   - Residual connections (essential)")
+    log_print("   - Batch normalization")
+    log_print("   - Proper weight initialization")
+    log_print("3. Avoid ELU in very deep networks - can cause instability")
     
-    print("\n Computational Considerations:")
+    log_print("\n Computational Considerations:")
     computation_times = {
         'ReLU': '1.0x (baseline)',
         'Leaky ReLU': '1.1x',
@@ -667,9 +668,9 @@ def activation_recommendations_for_research():
     }
     
     for activation, time in computation_times.items():
-        print(f"  {activation:<12}: {time}")
+        log_print(f"  {activation:<12}: {time}")
     
-    print("\n Specific Recommendations by Task:")
+    log_print("\n Specific Recommendations by Task:")
     
     recommendations = {
         "Weak Lensing Shear": ["GELU", "Mish", "Why: Smooth gradients crucial for precision"],
@@ -681,26 +682,26 @@ def activation_recommendations_for_research():
     }
     
     for task, (primary, secondary, reason) in recommendations.items():
-        print(f"  {task:<25}: {primary} > {secondary}")
-        print(f"  {'':<25}  {reason}")
-        print()
+        log_print(f"  {task:<25}: {primary} > {secondary}")
+        log_print(f"  {'':<25}  {reason}")
+        log_print()
     
-    print("Hyperparameter Tuning Tips:")
-    print("- Swish: Try β ∈ [0.5, 1.5] for the scaling parameter")
-    print("- ELU: α ∈ [0.5, 2.0] depending on desired negative saturation")
-    print("- Leaky ReLU: α ∈ [0.01, 0.1] for negative slope")
-    print("- Always validate on held-out galaxy data with realistic noise")
+    log_print("Hyperparameter Tuning Tips:")
+    log_print("- Swish: Try $\beta$ $\in$ [0.5, 1.5] for the scaling parameter")
+    log_print("- ELU: $\alpha$ $\in$ [0.5, 2.0] depending on desired negative saturation")
+    log_print("- Leaky ReLU: $\alpha$ $\in$ [0.01, 0.1] for negative slope")
+    log_print("- Always validate on held-out galaxy data with realistic noise")
     
-    print("\n Common Pitfalls:")
-    print("- Don't change activation mid-training - causes instability")
-    print("- Test with realistic galaxy noise levels - some activations more robust")
-    print("- Consider activation choice early - affects all other hyperparameters")
-    print("- Monitor gradient norms during training - early indicator of problems")
+    log_print("\n Common Pitfalls:")
+    log_print("- Don't change activation mid-training - causes instability")
+    log_print("- Test with realistic galaxy noise levels - some activations more robust")
+    log_print("- Consider activation choice early - affects all other hyperparameters")
+    log_print("- Monitor gradient norms during training - early indicator of problems")
 
 if __name__ == "__main__":
-    print("Day 6: Modern Activation Functions!")
-    print("Exploring beyond ReLU for better galaxy analysis")
-    
+    log_experiment_start(6, "Modern Activation Functions!")
+    log_print("Exploring beyond ReLU for better galaxy analysis")
+
     # Compare mathematical properties
     compare_activation_properties()
     
@@ -712,3 +713,5 @@ if __name__ == "__main__":
     
     # Research recommendations
     activation_recommendations_for_research()
+
+    log_experiment_end(6)
